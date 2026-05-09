@@ -1,3 +1,9 @@
+// 在导入其他模块之前，先全局注入 crypto（解决 Node.js 18+ 的 crypto 兼容性问题）
+const crypto = require('crypto');
+if (!global.crypto) {
+  global.crypto = crypto;
+}
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
