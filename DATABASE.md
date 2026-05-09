@@ -24,7 +24,7 @@
 | createdAt | Date | 创建时间 |
 | updatedAt | Date | 更新时间 |
 
-**用途**: 
+**用途**:
 - 用户注册/登录
 - 区分学生和教师权限
 - 关联班级、作业、提交等数据
@@ -163,6 +163,25 @@
 
 ---
 
+### 8. questions - 题库表
+存储练习题目（选择题和填空题）
+
+| 字段名 | 类型 | 说明 |
+|--------|------|------|
+| _id | ObjectId | 题目唯一标识 |
+| type | String | 题目类型：'choice'(选择题) 或 'fill'(填空题) |
+| difficulty | String | 难度：'easy'(简单)、'medium'(中等)、'hard'(困难) |
+| question | String | 题目文本（中英互译内容） |
+| options | Array | 选项列表 [{label: 'A', text: '选项内容'}]，仅选择题使用 |
+| answer | String | 正确答案 |
+| explanation | String | 解析说明 |
+| tags | Array | 知识点标签 |
+| createdBy | ObjectId | 创建者（教师）ID |
+| createdAt | Date | 创建时间 |
+| updatedAt | Date | 更新时间 |
+
+---
+
 ## 数据关系图
 
 ```
@@ -171,7 +190,8 @@ users ──────┬────── classes (教师创建班级)
             ├────── assignments (教师布置作业)
             ├────── submissions (学生提交作业)
             ├────── terms (创建术语)
-            └────── cases (创建案例)
+            ├────── cases (创建案例)
+            └────── questions (教师创建题目)
 
 classes ────┬────── users (教师)
             ├────── users (学生成员)
@@ -183,6 +203,9 @@ assignments ┬────── classes (所属班级)
 
 submissions ├────── assignments (对应作业)
             └────── users (提交学生)
+
+questions   ├────── users (创建者)
+            └────── tags (知识点标签)
 ```
 
 ---
@@ -214,13 +237,13 @@ const membersCount = cls.members.length;
 const assignmentsCount = db.assignments.countDocuments({ class: cls._id });
 
 // 已提交数
-const submittedCount = db.submissions.countDocuments({ 
+const submittedCount = db.submissions.countDocuments({
   assignment: { $in: db.assignments.find({ class: cls._id }).toArray().map(a => a._id) }
 });
 
 // 完成率
-const completionRate = (membersCount * assignmentsCount) > 0 
-  ? submittedCount / (membersCount * assignmentsCount) 
+const completionRate = (membersCount * assignmentsCount) > 0
+  ? submittedCount / (membersCount * assignmentsCount)
   : 0;
 ```
 
@@ -244,6 +267,23 @@ db.submissions.find({ score: null, status: "submitted" })
 db.submissions.aggregate([
   { $match: { score: { $ne: null } } },
   { $group: { _id: null, avgScore: { $avg: "$score" } } }
+])
+```
+
+### 9. 按难度查询题目
+```javascript
+db.questions.find({ difficulty: "easy" })
+```
+
+### 10. 随机获取N道题目
+```javascript
+db.questions.aggregate([{ $sample: { size: 10 } }])
+```
+
+### 11. 统计各难度题目数量
+```javascript
+db.questions.aggregate([
+  { $group: { _id: "$difficulty", count: { $sum: 1 } } }
 ])
 ```
 
@@ -278,4 +318,57 @@ db.terms.createIndex({ cat: 1 })
 // cases 表
 db.cases.createIndex({ title: "text", summary: "text", content: "text" })
 db.cases.createIndex({ domain: 1 })
+
+// questions 表
+db.questions.createIndex({ type: 1 })
+db.questions.createIndex({ difficulty: 1 })
+db.questions.createIndex({ question: "text" })
+db.questions.createIndex({ createdBy: 1 })
 ```
+
+---
+
+## 功能模块说明
+
+### 学生端功能
+| 功能 | 路由 | API | 说明 |
+|------|------|-----|------|
+| 首页 | /student | - | AI辅助翻译 + 个人评测概览 |
+| 课程 | /student/courses | /api/classes/mine | 查看已加入的班级和作业 |
+| 术语库 | /student/terms | /api/library/terms | 浏览和搜索翻译术语 |
+| 案例库 | /student/cases | /api/library/cases | 浏览翻译案例 |
+| 资料库 | /student/library | /api/library/* | 术语和案例综合浏览 |
+| 练习 | /student/practice | /api/questions/practice, /api/questions/check | 随机出题练习（选择+填空） |
+| AI评测 | /student/interpret | /api/eval/translation | 翻译质量AI评估 |
+| 智能对话 | /student/chat | /api/chat | AI对话助手 |
+| 个人中心 | /student/profile | /api/users/stats | 学习数据统计 |
+
+### 教师端功能
+| 功能 | 路由 | API | 说明 |
+|------|------|-----|------|
+| 首页 | /teacher | - | 功能导航 |
+| 智能对话 | /teacher/chat | /api/chat | AI对话助手 |
+| 班级管理 | /teacher/classes | /api/classes/* | 创建班级、邀请码、成员管理 |
+| 作业管理 | /teacher/assignments | /api/assignments/* | 布置作业、查看提交、批改 |
+| 术语库 | /teacher/terms | /api/library/terms | 创建和管理翻译术语 |
+| 案例库 | /teacher/cases | /api/library/cases | 创建和管理翻译案例 |
+| 题库 | /teacher/questions | /api/questions/* | 题目CRUD、Excel批量导入、下载模板 |
+| 数据看板 | /teacher/analytics | /api/classes/:id/dashboard | 班级学习数据分析 |
+
+### 题库Excel模板格式
+批量导入题目时，Excel文件需包含以下列：
+
+| 列名 | 必填 | 说明 |
+|------|------|------|
+| type | 是 | 题目类型：choice(选择题) 或 fill(填空题) |
+| difficulty | 是 | 难度：easy(简单)、medium(中等)、hard(困难) |
+| question | 是 | 题目文本 |
+| optionA | 否* | 选项A（选择题必填） |
+| optionB | 否* | 选项B（选择题必填） |
+| optionC | 否 | 选项C |
+| optionD | 否 | 选项D |
+| answer | 是 | 正确答案（选择题填A/B/C/D，填空题填答案文本） |
+| explanation | 否 | 解析说明 |
+| tags | 否 | 标签（多个用逗号分隔） |
+
+可通过 `GET /api/questions/template` 下载包含示例的Excel模板。
