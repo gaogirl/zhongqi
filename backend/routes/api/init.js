@@ -7,8 +7,8 @@
 const express = require('express');
 const router = express.Router();
 
-const Term = require('../models/Term');
-const Case = require('../models/Case');
+const Term = require('../../models/Term');
+const Case = require('../../models/Case');
 
 // 示例术语数据
 const sampleTerms = [
