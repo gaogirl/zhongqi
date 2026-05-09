@@ -6,6 +6,7 @@ export default function TeacherClasses() {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const [creating, setCreating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', subject: '', period: '', inviteMaxUses: 0, inviteExpiresAt: '' });
 
   const fetchTeaching = async () => {
@@ -65,37 +66,46 @@ export default function TeacherClasses() {
       <div className="card" style={{ marginTop:12 }}>
         <div className="card-head"><span>我教的班级</span></div>
         {loading ? <div>加载中…</div> : (
-          <div className="grid three">
-            {(list || []).map(cls => (
-              <div key={cls._id} className="card">
-                <div className="card-head"><span>{cls.name}</span></div>
-                <div>学科：{cls.subject || '-'}</div>
-                <div>学习周期：{cls.period || '-'}</div>
-                <div>人数：{cls.membersCount ?? '-'}</div>
-                <div style={{ marginTop:6 }}>
-                  <div>邀请码：<code>{cls.invite?.code || '—'}</code></div>
-                  <div>有效期：{cls.invite?.expiresAt ? new Date(cls.invite.expiresAt).toLocaleString() : '不限'}</div>
-                  <div>次数：{cls.invite?.maxUses ? `${cls.invite.maxUses}（已用${cls.invite?.usedCount||0}）` : '不限'}</div>
+          <>
+            {(list || []).length === 0 && !showForm && (
+              <div style={{textAlign:'center',padding:'60px 20px',color:'#868e96'}}>
+                <div style={{fontSize:'48px',marginBottom:'16px'}}>&#x1F4DA;</div>
+                <p style={{fontSize:'16px',marginBottom:'8px'}}>还没有创建班级</p>
+                <p style={{fontSize:'14px'}}>点击上方"创建班级"开始吧</p>
+              </div>
+            )}
+            <div className="grid three">
+              {(list || []).map(cls => (
+                <div key={cls._id} className="card">
+                  <div className="card-head"><span>{cls.name}</span></div>
+                  <div>学科：{cls.subject || '-'}</div>
+                  <div>学习周期：{cls.period || '-'}</div>
+                  <div>人数：{cls.membersCount ?? '-'}</div>
+                  <div style={{ marginTop:6 }}>
+                    <div>邀请码：<code>{cls.invite?.code || '—'}</code></div>
+                    <div>有效期：{cls.invite?.expiresAt ? new Date(cls.invite.expiresAt).toLocaleString() : '不限'}</div>
+                    <div>次数：{cls.invite?.maxUses ? `${cls.invite.maxUses}（已用${cls.invite?.usedCount||0}）` : '不限'}</div>
 
-                  {/* 编辑班级信息 */}
-                  <details style={{ marginTop:8 }}>
-                    <summary style={{ cursor:'pointer' }}>编辑班级信息</summary>
-                    <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginTop:8 }}>
-                      <input defaultValue={cls.name} placeholder="班级名称" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ name:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
-                      <input defaultValue={cls.subject||''} placeholder="学科类型" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ subject:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
-                      <input defaultValue={cls.period||''} placeholder="学习周期" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ period:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
+                    {/* 编辑班级信息 */}
+                    <details style={{ marginTop:8 }}>
+                      <summary style={{ cursor:'pointer' }}>编辑班级信息</summary>
+                      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8, marginTop:8 }}>
+                        <input defaultValue={cls.name} placeholder="班级名称" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ name:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
+                        <input defaultValue={cls.subject||''} placeholder="学科类型" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ subject:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
+                        <input defaultValue={cls.period||''} placeholder="学习周期" onBlur={async (e)=>{ try{ await classesAPI.update(cls._id,{ period:e.target.value}); await fetchTeaching(); }catch(err){ alert(err?.response?.data?.error||err?.message||'更新失败'); } }} />
+                      </div>
+                    </details>
+
+                    <div style={{ display:'flex', gap:8, marginTop:8, flexWrap:'wrap' }}>
+                      <button onClick={()=>navigator.clipboard.writeText(cls.invite?.code || '')}>复制邀请码</button>
+                      <button onClick={()=>onResetInvite(cls._id)}>重置邀请码</button>
+                      <a className="btn" href={`/teacher/classes/${cls._id}`} style={{ textDecoration:'none' }}>进入班级</a>
                     </div>
-                  </details>
-
-                  <div style={{ display:'flex', gap:8, marginTop:8, flexWrap:'wrap' }}>
-                    <button onClick={()=>navigator.clipboard.writeText(cls.invite?.code || '')}>复制邀请码</button>
-                    <button onClick={()=>onResetInvite(cls._id)}>重置邀请码</button>
-                    <a className="btn" href={`/teacher/classes/${cls._id}`} style={{ textDecoration:'none' }}>进入班级</a>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

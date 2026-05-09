@@ -1,15 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import classesAPI from '../services/classes';
 import assignmentsAPI from '../services/assignments';
 
 export default function TeacherClassDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [info, setInfo] = useState(null);
   const [members, setMembers] = useState([]);
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
+
+  // Announcement state
+  const [showAnnForm, setShowAnnForm] = useState(false);
+  const [annForm, setAnnForm] = useState({ title: '', content: '', pinned: false });
+  const [annSubmitting, setAnnSubmitting] = useState(false);
 
   // 作业相关
   const [assnList, setAssnList] = useState([]);
@@ -51,6 +57,41 @@ export default function TeacherClassDetail() {
     }
   };
 
+  const onDeleteClass = async () => {
+    if (!window.confirm('确定要删除该班级吗？此操作不可恢复！')) return;
+    try {
+      await classesAPI.deleteClass(id);
+      navigate('/teacher/classes');
+    } catch (e) {
+      setErr(e?.response?.data?.error || e?.message || '删除班级失败');
+    }
+  };
+
+  const onAddAnnouncement = async () => {
+    if (!annForm.title.trim()) { setErr('请填写公告标题'); return; }
+    if (!annForm.content.trim()) { setErr('请填写公告内容'); return; }
+    setAnnSubmitting(true);
+    setErr('');
+    try {
+      await classesAPI.addAnnouncement(id, { title: annForm.title, content: annForm.content, pinned: annForm.pinned });
+      setAnnForm({ title: '', content: '', pinned: false });
+      setShowAnnForm(false);
+      await fetchAll();
+    } catch (e) {
+      setErr(e?.response?.data?.error || e?.message || '发布公告失败');
+    } finally { setAnnSubmitting(false); }
+  };
+
+  const onDeleteAnnouncement = async (index) => {
+    if (!window.confirm('确定要删除该公告吗？')) return;
+    try {
+      await classesAPI.deleteAnnouncement(id, index);
+      await fetchAll();
+    } catch (e) {
+      setErr(e?.response?.data?.error || e?.message || '删除公告失败');
+    }
+  };
+
   const parseQuestions = () => {
     // 每行一题；若包含 "||"，则左侧为提示文本，右侧为参考答案
     const lines = (form.textBlock || '').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
@@ -86,6 +127,8 @@ export default function TeacherClassDetail() {
 
   const pages = Math.max(1, Math.ceil(assnTotal / 20));
 
+  const announcements = info?.announcements || [];
+
   return (
     <div className="page">
       <div className="card">
@@ -93,17 +136,115 @@ export default function TeacherClassDetail() {
         {loading && <div>加载中…</div>}
         {err && <div className="note" style={{ color:'#e03131' }}>{err}</div>}
         {info && (
-          <div style={{ marginBottom:12 }}>
-            <div><b>{info.name}</b>（{info.subject || '未知学科'}） · 学习周期：{info.period || '—'} · 人数：{info.membersCount ?? '-'}
+          <div style={{ marginBottom:12, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <div>
+              <div><b>{info.name}</b>（{info.subject || '未知学科'}） · 学习周期：{info.period || '—'} · 人数：{info.membersCount ?? '-'}
+              </div>
             </div>
+            <button
+              className="btn"
+              style={{ color:'#fff', background:'#e03131', borderColor:'#e03131', fontSize:13, flexShrink:0 }}
+              onClick={onDeleteClass}
+            >
+              删除班级
+            </button>
           </div>
         )}
+
+        {/* Announcement Management Section */}
+        <div className="card" style={{ marginTop:12 }}>
+          <div className="card-head" style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+            <span>班级公告</span>
+            <button
+              className="btn primary"
+              style={{ fontSize:13 }}
+              onClick={() => setShowAnnForm(!showAnnForm)}
+            >
+              {showAnnForm ? '取消' : '发布公告'}
+            </button>
+          </div>
+
+          {showAnnForm && (
+            <div style={{ padding:'12px 0', borderBottom:'1px solid #eee', marginBottom:12 }}>
+              <div style={{ marginBottom:8 }}>
+                <input
+                  placeholder="公告标题"
+                  value={annForm.title}
+                  onChange={e => setAnnForm({ ...annForm, title: e.target.value })}
+                  style={{ width:'100%', padding:'6px 10px', boxSizing:'border-box' }}
+                />
+              </div>
+              <div style={{ marginBottom:8 }}>
+                <textarea
+                  placeholder="公告内容"
+                  value={annForm.content}
+                  onChange={e => setAnnForm({ ...annForm, content: e.target.value })}
+                  style={{ width:'100%', minHeight:80, padding:'6px 10px', boxSizing:'border-box' }}
+                />
+              </div>
+              <div style={{ marginBottom:8 }}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={annForm.pinned}
+                    onChange={e => setAnnForm({ ...annForm, pinned: e.target.checked })}
+                  /> 置顶公告
+                </label>
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn primary" onClick={onAddAnnouncement} disabled={annSubmitting}>
+                  {annSubmitting ? '发布中…' : '确认发布'}
+                </button>
+                <button className="btn" onClick={() => { setShowAnnForm(false); setAnnForm({ title:'', content:'', pinned:false }); }}>
+                  取消
+                </button>
+              </div>
+            </div>
+          )}
+
+          {announcements.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'20px', color:'#868e96' }}>暂无公告</div>
+          ) : (
+            <div>
+              {announcements.map((ann, idx) => (
+                <div key={idx} style={{
+                  padding: '10px 14px',
+                  marginBottom: 8,
+                  background: '#f8f9fa',
+                  borderRadius: 6,
+                  borderLeft: ann.pinned ? '3px solid #f59f00' : '3px solid #dee2e6',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                  gap: 12,
+                }}>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:4 }}>
+                      {ann.pinned && <span style={{ fontSize:14 }}>&#x1F4CC;</span>}
+                      <span style={{ fontWeight:600, fontSize:14 }}>{ann.title}</span>
+                    </div>
+                    <div style={{ fontSize:13, color:'#495057', lineHeight:1.5, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                      {ann.content}
+                    </div>
+                  </div>
+                  <button
+                    className="btn"
+                    style={{ color:'#e03131', borderColor:'#e03131', fontSize:12, flexShrink:0, padding:'2px 8px' }}
+                    onClick={() => onDeleteAnnouncement(idx)}
+                  >
+                    删除
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <div className="grid two">
           <div className="card">
             <div className="card-head"><span>成员管理</span></div>
             {(members || []).length === 0 ? (
-              <div>暂无学生</div>
+              <div style={{textAlign:'center',padding:'20px',color:'#868e96'}}>暂无学生加入</div>
             ) : (
               <table style={{ width:'100%', borderCollapse:'collapse' }}>
                 <thead>
@@ -170,7 +311,7 @@ export default function TeacherClassDetail() {
           </div>
           <div>
             <textarea
-              placeholder={form.type==='read' ? '每行一段英文，供学生朗读（参考答案可留空）' : '每行一题，若包含“||”则左侧为题目文本，右侧为参考答案。例如：\n今天天气很好。||The weather is nice today.'}
+              placeholder={form.type==='read' ? '每行一段英文，供学生朗读（参考答案可留空）' : '每行一题，若包含"||"则左侧为题目文本，右侧为参考答案。例如：\n今天天气很好。||The weather is nice today.'}
               value={form.textBlock}
               onChange={e=>setForm({...form, textBlock:e.target.value})}
               style={{ width:'100%', minHeight:120 }}
@@ -184,7 +325,7 @@ export default function TeacherClassDetail() {
         <div className="card" style={{ marginTop:12 }}>
           <div className="card-head"><span>作业列表</span></div>
           {(assnList || []).length === 0 ? (
-            <div>暂无作业</div>
+            <div style={{textAlign:'center',padding:'20px',color:'#868e96'}}>暂无作业</div>
           ) : (
             <div>
               {(assnList || []).map(a => (
@@ -216,4 +357,3 @@ export default function TeacherClassDetail() {
     </div>
   );
 }
-

@@ -53,8 +53,16 @@ export default function StudentClasses() {
         {loading ? (
           <div>加载中…</div>
         ) : (
-          <div className="grid three">
-            {(list || []).map(cls => (
+          <>
+            {(list || []).length === 0 && (
+              <div style={{textAlign:'center',padding:'60px 20px',color:'#868e96'}}>
+                <div style={{fontSize:'48px',marginBottom:'16px'}}>&#x1F3EB;</div>
+                <p style={{fontSize:'16px',marginBottom:'8px'}}>你还没有加入任何班级</p>
+                <p style={{fontSize:'14px'}}>请使用上方的邀请码加入班级</p>
+              </div>
+            )}
+            <div className="grid three">
+              {(list || []).map(cls => (
               <div key={cls._id} className="card" style={{ cursor:'pointer' }} onClick={()=>navigate(`/student/classes/${cls._id}`)}>
                 <div className="card-head">
                   <span>{cls.name}</span>
@@ -68,6 +76,7 @@ export default function StudentClasses() {
               </div>
             ))}
           </div>
+          </>
         )}
       </div>
     </div>

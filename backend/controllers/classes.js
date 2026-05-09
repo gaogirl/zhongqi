@@ -200,14 +200,25 @@ exports.classDetail = async (req, res) => {
     if (!cls) return res.status(404).json({ error: '班级不存在' });
 
     const latestAssignment = await Assignment.findOne({ class: id }).sort({ createdAt: -1 }).lean();
+    // Sort announcements: pinned first, then by createdAt desc
+    const sortedAnnouncements = (cls.announcements || [])
+      .slice()
+      .sort((a, b) => {
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
     res.json({
       _id: cls._id,
       name: cls.name,
       subject: cls.subject,
       period: cls.period,
+      description: cls.description || '',
       teacher: cls.teacher,
       membersCount: (cls.members || []).length,
       latestAssignment: latestAssignment ? { title: latestAssignment.title, dueAt: latestAssignment.dueAt } : null,
+      announcements: sortedAnnouncements,
     });
   } catch (e) {
     console.error('classDetail error', e);
@@ -318,5 +329,152 @@ exports.dashboard = async (req, res) => {
   } catch (e) {
     console.error('dashboard error', e);
     res.status(500).json({ error: '获取数据看板失败' });
+  }
+};
+
+exports.addAnnouncement = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, pinned } = req.body;
+    if (!title || !content) return res.status(400).json({ error: '标题和内容不能为空' });
+
+    const cls = await Class.findById(id);
+    if (!cls) return res.status(404).json({ error: '班级不存在' });
+    if (String(cls.teacher) !== String(req.user._id) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: '无权操作' });
+    }
+
+    cls.announcements.push({
+      title,
+      content,
+      pinned: pinned || false,
+      createdBy: req.user._id,
+      createdAt: new Date()
+    });
+    await cls.save();
+
+    // Return the new announcement
+    const newAnnouncement = cls.announcements[cls.announcements.length - 1];
+    res.json({ success: true, announcement: newAnnouncement });
+  } catch (e) {
+    console.error('addAnnouncement error', e);
+    res.status(500).json({ error: '添加公告失败' });
+  }
+};
+
+exports.deleteAnnouncement = async (req, res) => {
+  try {
+    const { id, index } = req.params;
+    const cls = await Class.findById(id);
+    if (!cls) return res.status(404).json({ error: '班级不存在' });
+    if (String(cls.teacher) !== String(req.user._id) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: '无权操作' });
+    }
+
+    const idx = parseInt(index);
+    if (isNaN(idx) || idx < 0 || idx >= cls.announcements.length) {
+      return res.status(400).json({ error: '公告索引无效' });
+    }
+
+    cls.announcements.splice(idx, 1);
+    await cls.save();
+    res.json({ success: true });
+  } catch (e) {
+    console.error('deleteAnnouncement error', e);
+    res.status(500).json({ error: '删除公告失败' });
+  }
+};
+
+exports.studentDashboard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cls = await Class.findById(id);
+    if (!cls) return res.status(404).json({ error: '班级不存在' });
+    if (!cls.members.includes(req.user._id) && String(cls.teacher) !== String(req.user._id)) {
+      return res.status(403).json({ error: '你不是该班级成员' });
+    }
+
+    const Assignment = require('../models/Assignment');
+    const Submission = require('../models/Submission');
+
+    const assignments = await Assignment.find({ class: id });
+    const assignmentIds = assignments.map(a => a._id);
+
+    const submissions = await Submission.find({
+      student: req.user._id,
+      assignment: { $in: assignmentIds }
+    });
+
+    const totalAssignments = assignments.length;
+    const submittedCount = submissions.length;
+    const gradedCount = submissions.filter(s => s.status === 'graded').length;
+    const gradedSubmissions = submissions.filter(s => s.totalScore !== null && s.totalScore !== undefined);
+    const averageScore = gradedSubmissions.length > 0
+      ? Math.round(gradedSubmissions.reduce((sum, s) => sum + s.totalScore, 0) / gradedSubmissions.length)
+      : 0;
+
+    // Pending assignments (not submitted or in_progress)
+    const submittedIds = new Set(submissions.map(s => String(s.assignment)));
+    const pendingAssignments = assignments
+      .filter(a => !submittedIds.has(String(a._id)))
+      .sort({ createdAt: -1 })
+      .slice(0, 5)
+      .map(a => ({ _id: a._id, title: a.title, type: a.type, dueAt: a.dueAt }));
+
+    res.json({
+      totalAssignments,
+      submittedCount,
+      gradedCount,
+      averageScore,
+      completionRate: totalAssignments > 0 ? Math.round((submittedCount / totalAssignments) * 100) : 0,
+      pendingAssignments
+    });
+  } catch (e) {
+    console.error('studentDashboard error', e);
+    res.status(500).json({ error: '获取学生统计失败' });
+  }
+};
+
+exports.leaveClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cls = await Class.findById(id);
+    if (!cls) return res.status(404).json({ error: '班级不存在' });
+
+    const memberIndex = cls.members.indexOf(req.user._id);
+    if (memberIndex === -1) return res.status(400).json({ error: '你不是该班级成员' });
+
+    cls.members.splice(memberIndex, 1);
+    await cls.save();
+    res.json({ success: true, message: '已退出班级' });
+  } catch (e) {
+    console.error('leaveClass error', e);
+    res.status(500).json({ error: '退出班级失败' });
+  }
+};
+
+exports.deleteClass = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cls = await Class.findById(id);
+    if (!cls) return res.status(404).json({ error: '班级不存在' });
+    if (String(cls.teacher) !== String(req.user._id) && req.user.role !== 'admin') {
+      return res.status(403).json({ error: '无权操作' });
+    }
+
+    // Delete related submissions and assignments
+    const Assignment = require('../models/Assignment');
+    const Submission = require('../models/Submission');
+
+    const assignments = await Assignment.find({ class: id });
+    const assignmentIds = assignments.map(a => a._id);
+    await Submission.deleteMany({ assignment: { $in: assignmentIds } });
+    await Assignment.deleteMany({ class: id });
+    await Class.findByIdAndDelete(id);
+
+    res.json({ success: true, message: '班级已删除' });
+  } catch (e) {
+    console.error('deleteClass error', e);
+    res.status(500).json({ error: '删除班级失败' });
   }
 };

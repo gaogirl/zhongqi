@@ -31,5 +31,16 @@ router.get('/:id', protect, classes.classDetail);
 // 教师：数据看板
 router.get('/:id/dashboard', protect, authorize('teacher', 'admin'), classes.dashboard);
 
+// Announcements
+router.post('/:id/announcements', protect, authorize('teacher', 'admin'), classes.addAnnouncement);
+router.delete('/:id/announcements/:index', protect, authorize('teacher', 'admin'), classes.deleteAnnouncement);
+
+// Student
+router.get('/:id/student-dashboard', protect, classes.studentDashboard);
+router.post('/:id/leave', protect, classes.leaveClass);
+
+// Teacher/Admin
+router.delete('/:id', protect, authorize('teacher', 'admin'), classes.deleteClass);
+
 module.exports = router;
 

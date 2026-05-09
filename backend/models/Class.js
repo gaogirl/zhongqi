@@ -15,6 +15,20 @@ const ClassSchema = new Schema({
   teacher: { type: Schema.Types.ObjectId, ref: 'users', required: true },
   invite: { type: InviteSchema, default: {} },
   members: [{ type: Schema.Types.ObjectId, ref: 'users' }],
+  // 班级描述
+  description: {
+    type: String,
+    default: '',
+    maxlength: 500
+  },
+  // 公告列表
+  announcements: [{
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    pinned: { type: Boolean, default: false },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
+    createdAt: { type: Date, default: Date.now }
+  }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('classes', ClassSchema);

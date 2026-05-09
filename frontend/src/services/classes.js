@@ -11,6 +11,11 @@ const classesAPI = {
   removeMember: (id, uid) => api.delete(`/classes/${id}/members/${uid}`),
   detail: (id) => api.get(`/classes/${id}`),
   dashboard: (id) => api.get(`/classes/${id}/dashboard`),
+  addAnnouncement: (id, data) => api.post(`/classes/${id}/announcements`, data),
+  deleteAnnouncement: (id, index) => api.delete(`/classes/${id}/announcements/${index}`),
+  studentDashboard: (id) => api.get(`/classes/${id}/student-dashboard`),
+  leaveClass: (id) => api.post(`/classes/${id}/leave`),
+  deleteClass: (id) => api.delete(`/classes/${id}`),
 };
 
 export default classesAPI;
