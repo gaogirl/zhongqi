@@ -33,7 +33,8 @@ const app = express();
 const corsOptions = {
   origin: [
     process.env.CLIENT_URL || 'http://localhost:5173',
-    'https://gaogirl.github.io'
+    'https://gaogirl.github.io',
+    'https://gaogirl.github.io/ai-virtual'
   ],
   credentials: true, // 允许发送cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
