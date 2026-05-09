@@ -6,6 +6,7 @@
 
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const Term = require('../../models/Term');
 const Case = require('../../models/Case');
@@ -25,7 +26,7 @@ const sampleTerms = [
 ];
 
 // 创建一个虚拟的 ObjectId 用于示例数据
-const dummyUserId = new require('mongoose').Types.ObjectId();
+const dummyUserId = new mongoose.Types.ObjectId();
 
 // 示例案例数据
 const sampleCases = [
