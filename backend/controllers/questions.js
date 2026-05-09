@@ -97,9 +97,7 @@ exports.getRandom = async (req, res) => {
           type: 1,
           difficulty: 1,
           tags: 1,
-          // 练习模式不返回答案和解析
-          answer: 0,
-          explanation: 0,
+          _id: 1,
         },
       },
     ]);
