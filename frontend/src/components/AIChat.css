@@ -1,5 +1,5 @@
 /* ========================================
-   AI 聊天组件 - 现代玻璃拟态风格
+   AI 聊天组件 - 浅色玻璃拟态风格
    ======================================== */
 
 /* ----- 聊天容器 ----- */
@@ -8,12 +8,12 @@
   flex-direction: column;
   height: 100%;
   max-height: 600px;
-  background: rgba(30, 41, 59, 0.6);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
   overflow: hidden;
 }
 
@@ -23,8 +23,8 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: rgba(30, 41, 59, 0.8);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .ai-chat-avatar {
@@ -36,7 +36,7 @@
   align-items: center;
   justify-content: center;
   font-size: var(--text-xl);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
 }
 
 .ai-chat-info {
@@ -46,7 +46,7 @@
 .ai-chat-title {
   font-size: var(--text-base);
   font-weight: var(--font-bold);
-  color: #e2e8f0;
+  color: var(--gray-800);
 }
 
 .ai-chat-status {
@@ -54,14 +54,14 @@
   align-items: center;
   gap: var(--space-1);
   font-size: var(--text-xs);
-  color: #34d399;
+  color: var(--success);
 }
 
 .ai-chat-status::before {
   content: '';
   width: 6px;
   height: 6px;
-  background: #34d399;
+  background: var(--success);
   border-radius: 50%;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -84,9 +84,9 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-md);
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  color: #94a3b8;
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-500);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,9 +95,9 @@
 }
 
 .ai-chat-action-btn:hover {
-  background: rgba(99, 102, 241, 0.2);
-  color: #e2e8f0;
-  border-color: rgba(99, 102, 241, 0.3);
+  background: var(--primary-50);
+  color: var(--primary-600);
+  border-color: var(--primary-200);
 }
 
 /* ----- 聊天消息区域 ----- */
@@ -121,12 +121,12 @@
 }
 
 .ai-chat-output::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.2);
+  background: var(--gray-300);
   border-radius: var(--radius-full);
 }
 
 .ai-chat-output::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.3);
+  background: var(--gray-400);
 }
 
 /* ----- 消息气泡 ----- */
@@ -170,13 +170,13 @@
 }
 
 .chat-message.user .message-avatar {
-  background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  background: var(--primary-100);
+  border: 1px solid var(--primary-200);
 }
 
 .chat-message.ai .message-avatar {
   background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
 }
 
 /* 消息内容 */
@@ -198,20 +198,20 @@
   background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   color: white;
   border-bottom-right-radius: var(--space-1);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
 }
 
 .chat-message.ai .message-bubble {
-  background: rgba(15, 23, 42, 0.7);
-  color: #e2e8f0;
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: var(--gray-100);
+  color: var(--gray-800);
+  border: 1px solid var(--gray-200);
   border-bottom-left-radius: var(--space-1);
 }
 
 /* 消息时间 */
 .message-time {
   font-size: var(--text-xs);
-  color: #64748b;
+  color: var(--gray-400);
   align-self: flex-end;
 }
 
@@ -225,8 +225,8 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   border-bottom-left-radius: var(--space-1);
   align-self: flex-start;
@@ -240,7 +240,7 @@
 .typing-dots span {
   width: 8px;
   height: 8px;
-  background: #60a5fa;
+  background: var(--primary-500);
   border-radius: 50%;
   animation: typingBounce 1.4s ease-in-out infinite both;
 }
@@ -267,8 +267,8 @@
 /* ----- 输入区域 ----- */
 .ai-chat-input {
   padding: var(--space-4) var(--space-5);
-  background: rgba(30, 41, 59, 0.8);
-  border-top: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid var(--gray-200);
 }
 
 .input-wrapper {
@@ -282,10 +282,10 @@
   min-height: 44px;
   max-height: 120px;
   padding: var(--space-3) var(--space-4);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
-  background: rgba(15, 23, 42, 0.6);
-  color: #e2e8f0;
+  background: white;
+  color: var(--gray-800);
   font-size: var(--text-sm);
   line-height: var(--leading-relaxed);
   resize: none;
@@ -294,12 +294,12 @@
 }
 
 .chat-textarea:focus {
-  border-color: rgba(96, 165, 250, 0.5);
+  border-color: var(--primary-400);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .chat-textarea::placeholder {
-  color: #64748b;
+  color: var(--gray-400);
 }
 
 /* 发送按钮 */
@@ -315,13 +315,13 @@
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-normal);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   flex-shrink: 0;
 }
 
 .send-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .send-btn:active {
@@ -329,7 +329,7 @@
 }
 
 .send-btn:disabled {
-  background: rgba(99, 102, 241, 0.2);
+  background: var(--gray-200);
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -338,7 +338,7 @@
 /* 输入提示 */
 .input-hint {
   font-size: var(--text-xs);
-  color: #64748b;
+  color: var(--gray-400);
   margin-top: var(--space-2);
   text-align: center;
 }
@@ -346,10 +346,10 @@
 /* ----- 错误提示 ----- */
 .ai-chat-error {
   padding: var(--space-3) var(--space-4);
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--error-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-md);
-  color: #f87171;
+  color: var(--error);
   font-size: var(--text-sm);
   margin: var(--space-3) var(--space-5);
   display: flex;
@@ -379,19 +379,19 @@
 .welcome-icon {
   font-size: 64px;
   margin-bottom: var(--space-4);
-  filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.3));
+  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.2));
 }
 
 .welcome-title {
   font-size: var(--text-xl);
   font-weight: var(--font-bold);
-  color: #e2e8f0;
+  color: var(--gray-800);
   margin-bottom: var(--space-2);
 }
 
 .welcome-desc {
   font-size: var(--text-sm);
-  color: #94a3b8;
+  color: var(--gray-500);
   max-width: 300px;
   margin: 0 auto;
   line-height: var(--leading-relaxed);
@@ -407,25 +407,25 @@
 
 .suggestion-chip {
   padding: var(--space-2) var(--space-3);
-  background: rgba(99, 102, 241, 0.1);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: var(--primary-50);
+  border: 1px solid var(--primary-200);
   border-radius: var(--radius-full);
   font-size: var(--text-xs);
-  color: #94a3b8;
+  color: var(--gray-600);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .suggestion-chip:hover {
-  background: rgba(99, 102, 241, 0.2);
-  border-color: rgba(99, 102, 241, 0.3);
-  color: #e2e8f0;
+  background: var(--primary-100);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
 }
 
 /* ----- 代码块样式 ----- */
 .message-bubble pre {
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: var(--gray-800);
+  border: 1px solid var(--gray-700);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   overflow-x: auto;
@@ -482,8 +482,8 @@
 .ai-chat-loading .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(99, 102, 241, 0.2);
-  border-top-color: #60a5fa;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

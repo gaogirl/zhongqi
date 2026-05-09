@@ -1,5 +1,5 @@
 /* ========================================
-   教师端数据看板 - 深色玻璃拟态风格
+   教师端数据看板 - 浅色玻璃拟态风格
    ======================================== */
 
 /* ----- 看板页面容器 ----- */
@@ -15,20 +15,20 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(30, 41, 59, 0.7);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
   padding: var(--space-6) var(--space-8);
   margin-bottom: var(--space-6);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
 }
 
 .dashboard-header .header-left h1 {
   font-size: var(--text-2xl);
   font-weight: var(--font-bold);
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -37,7 +37,7 @@
 
 .dashboard-header .header-left p {
   font-size: var(--text-sm);
-  color: #94a3b8;
+  color: var(--gray-500);
 }
 
 .dashboard-header .header-right {
@@ -49,10 +49,10 @@
 /* 班级选择器 */
 .class-select {
   padding: var(--space-3) var(--space-4);
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-md);
-  background: rgba(15, 23, 42, 0.6);
-  color: #e2e8f0;
+  background: white;
+  color: var(--gray-800);
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   cursor: pointer;
@@ -60,18 +60,18 @@
 }
 
 .class-select:hover {
-  border-color: rgba(96, 165, 250, 0.5);
+  border-color: var(--primary-300);
 }
 
 .class-select:focus {
   outline: none;
-  border-color: #60a5fa;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .class-select option {
-  color: #e2e8f0;
-  background: #1e293b;
+  color: var(--gray-800);
+  background: white;
 }
 
 /* 导出按钮 */
@@ -88,21 +88,21 @@
   font-weight: var(--font-semibold);
   cursor: pointer;
   transition: all var(--transition-normal);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .btn-export:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 /* ----- 错误提示 ----- */
 .dashboard-error {
   padding: var(--space-4) var(--space-6);
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--error-light);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-lg);
-  color: #f87171;
+  color: var(--error);
   font-size: var(--text-sm);
   margin-bottom: var(--space-6);
   display: flex;
@@ -118,17 +118,17 @@
   justify-content: center;
   padding: var(--space-16);
   text-align: center;
-  background: rgba(30, 41, 59, 0.4);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
 }
 
 .loading-spinner {
   width: 48px;
   height: 48px;
-  border: 3px solid rgba(99, 102, 241, 0.2);
-  border-top-color: #60a5fa;
+  border: 3px solid var(--gray-200);
+  border-top-color: var(--primary-500);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -141,7 +141,7 @@
 
 .dashboard-loading p {
   margin-top: var(--space-4);
-  color: #94a3b8;
+  color: var(--gray-500);
   font-size: var(--text-base);
 }
 
@@ -173,36 +173,36 @@
 
 /* 指标卡片 */
 .metric-card {
-  background: rgba(30, 41, 59, 0.6);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
   transition: all var(--transition-normal);
 }
 
 .metric-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: var(--glass-shadow-lg);
+  border-color: var(--gray-300);
 }
 
 /* 高亮卡片 */
 .metric-card.highlight {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(245, 158, 11, 0.05) 100%);
   border: 1px solid rgba(251, 191, 36, 0.3);
 }
 
 .metric-card.highlight .metric-icon {
-  background: rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.15);
 }
 
 .metric-card.highlight .metric-value {
-  color: #fbbf24;
+  color: #d97706;
 }
 
 /* 指标图标 */
@@ -215,7 +215,7 @@
   justify-content: center;
   font-size: 24px;
   flex-shrink: 0;
-  background: rgba(59, 130, 246, 0.15);
+  background: var(--info-light);
 }
 
 .metric-info {
@@ -225,13 +225,13 @@
 .metric-value {
   font-size: var(--text-2xl);
   font-weight: var(--font-extrabold);
-  color: #e2e8f0;
+  color: var(--gray-800);
   line-height: 1.2;
 }
 
 .metric-label {
   font-size: var(--text-xs);
-  color: #94a3b8;
+  color: var(--gray-500);
   margin-top: var(--space-1);
 }
 
@@ -246,11 +246,11 @@
 }
 
 .metric-trend.up {
-  color: #34d399;
+  color: #047857;
 }
 
 .metric-trend.down {
-  color: #f87171;
+  color: var(--error);
 }
 
 /* ----- 详细数据区 ----- */
@@ -268,12 +268,12 @@
 
 /* 面板 */
 .dashboard-panel {
-  background: rgba(30, 41, 59, 0.6);
+  background: var(--glass-bg-strong);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-xl);
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow);
 }
 
 .dashboard-panel .panel-header {
@@ -281,31 +281,31 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-5) var(--space-6);
-  background: rgba(30, 41, 59, 0.8);
-  border-bottom: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid var(--gray-200);
 }
 
 .panel-icon {
   font-size: var(--text-xl);
-  filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
 }
 
 .panel-title {
   font-size: var(--text-base);
   font-weight: var(--font-bold);
-  color: #e2e8f0;
+  color: var(--gray-800);
 }
 
 .panel-action {
   margin-left: auto;
   font-size: var(--text-xs);
-  color: #60a5fa;
+  color: var(--primary-600);
   cursor: pointer;
   transition: color var(--transition-fast);
 }
 
 .panel-action:hover {
-  color: #93c5fd;
+  color: var(--primary-700);
 }
 
 .dashboard-panel .panel-body {
@@ -325,15 +325,15 @@
   align-items: flex-start;
   gap: var(--space-3);
   padding: var(--space-4);
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
 }
 
 .mistake-item:hover {
-  background: rgba(15, 23, 42, 0.7);
-  border-color: rgba(99, 102, 241, 0.2);
+  background: var(--glass-bg-strong);
+  border-color: var(--gray-300);
   transform: translateX(4px);
 }
 
@@ -349,7 +349,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
 }
 
 .mistake-rank.top3 {
@@ -362,20 +362,20 @@
 
 .mistake-text {
   font-size: var(--text-sm);
-  color: #e2e8f0;
+  color: var(--gray-800);
   line-height: var(--leading-relaxed);
 }
 
 .mistake-count {
   font-size: var(--text-xs);
-  color: #94a3b8;
+  color: var(--gray-500);
   margin-top: var(--space-1);
 }
 
 .mistake-bar {
   width: 80px;
   height: 4px;
-  background: rgba(99, 102, 241, 0.2);
+  background: var(--gray-200);
   border-radius: var(--radius-full);
   margin-top: var(--space-2);
   overflow: hidden;
@@ -400,15 +400,15 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4);
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(99, 102, 241, 0.1);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--gray-200);
   border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
 }
 
 .submission-item:hover {
-  background: rgba(15, 23, 42, 0.7);
-  border-color: rgba(99, 102, 241, 0.2);
+  background: var(--glass-bg-strong);
+  border-color: var(--gray-300);
 }
 
 .submission-info {
@@ -418,18 +418,18 @@
 .submission-student {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
-  color: #e2e8f0;
+  color: var(--gray-800);
 }
 
 .submission-task {
   font-size: var(--text-xs);
-  color: #94a3b8;
+  color: var(--gray-500);
   margin-top: var(--space-1);
 }
 
 .submission-time {
   font-size: var(--text-xs);
-  color: #64748b;
+  color: var(--gray-400);
   margin-top: var(--space-1);
 }
 
@@ -442,18 +442,18 @@
 }
 
 .score-badge.high {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  background: var(--success-light);
+  color: #047857;
 }
 
 .score-badge.medium {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
+  background: var(--warning-light);
+  color: #b45309;
 }
 
 .score-badge.low {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+  background: var(--error-light);
+  color: var(--error);
 }
 
 /* 状态徽章 */
@@ -465,13 +465,13 @@
 }
 
 .status-badge.pending {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
+  background: var(--warning-light);
+  color: #b45309;
 }
 
 .status-badge.graded {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
+  background: var(--success-light);
+  color: #047857;
 }
 
 /* ----- 图表容器 ----- */
@@ -493,7 +493,7 @@
   align-items: center;
   gap: var(--space-2);
   font-size: var(--text-xs);
-  color: #94a3b8;
+  color: var(--gray-500);
 }
 
 .legend-dot-custom {
@@ -521,13 +521,13 @@
 .dashboard-empty p {
   font-size: var(--text-base);
   font-weight: var(--font-semibold);
-  color: #e2e8f0;
+  color: var(--gray-800);
   margin-bottom: var(--space-2);
 }
 
 .dashboard-empty span {
   font-size: var(--text-sm);
-  color: #64748b;
+  color: var(--gray-500);
 }
 
 /* ----- 响应式调整 ----- */
