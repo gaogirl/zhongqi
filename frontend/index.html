@@ -1,10 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/zhongqi/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>AI 实时翻译学习平台</title>
+    <script>
+      // SPA 路由重定向处理 - 从 404.html 重定向回来时恢复路径
+      (function() {
+        var l = window.location;
+        if (l.search.indexOf('?/') === 0) {
+          var pathSegmentsToKeep = 1;
+          var decoded = l.search.slice(2).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&'); 
+          });
+          var newPath = decoded[0] || '';
+          var search = decoded.slice(1).join('&');
+          var newUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') +
+            (newPath ? '/' + newPath : '') +
+            (search ? '?' + search : '') +
+            l.hash;
+          history.replaceState(null, null, newUrl);
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
