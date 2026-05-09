@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 
 const Term = require('../../models/Term');
 const Case = require('../../models/Case');
+const Question = require('../../models/Question');
 
 // 生成渐变色彩
 const gradients = [
@@ -386,22 +387,300 @@ const sampleCases = [
   },
 ];
 
+// 示例题目数据
+const sampleQuestions = [
+  // ===== 简单选择题 =====
+  {
+    type: 'choice',
+    difficulty: 'easy',
+    question: '「apple」的中文意思是？',
+    options: [
+      { label: 'A', text: '香蕉' },
+      { label: 'B', text: '苹果' },
+      { label: 'C', text: '橙子' },
+      { label: 'D', text: '葡萄' }
+    ],
+    answer: 'B',
+    explanation: 'apple 是苹果的英文表达，是最基础的水果词汇之一。',
+    tags: ['基础词汇', '水果']
+  },
+  {
+    type: 'choice',
+    difficulty: 'easy',
+    question: '「图书馆」的英文翻译是？',
+    options: [
+      { label: 'A', text: 'bookstore' },
+      { label: 'B', text: 'library' },
+      { label: 'C', text: 'museum' },
+      { label: 'D', text: 'school' }
+    ],
+    answer: 'B',
+    explanation: 'library 是图书馆的意思，bookstore 是书店，museum 是博物馆，school 是学校。',
+    tags: ['基础词汇', '场所']
+  },
+  {
+    type: 'choice',
+    difficulty: 'easy',
+    question: '「I am a student.」的正确翻译是？',
+    options: [
+      { label: 'A', text: '我是一名老师。' },
+      { label: 'B', text: '我是一名学生。' },
+      { label: 'C', text: '我是一名医生。' },
+      { label: 'D', text: '我是一名工人。' }
+    ],
+    answer: 'B',
+    explanation: 'student 意为学生，teacher 是老师，doctor 是医生，worker 是工人。',
+    tags: ['基础句型', '职业']
+  },
+  {
+    type: 'choice',
+    difficulty: 'easy',
+    question: '「谢谢」的英文表达是？',
+    options: [
+      { label: 'A', text: 'Sorry' },
+      { label: 'B', text: 'Hello' },
+      { label: 'C', text: 'Thank you' },
+      { label: 'D', text: 'Goodbye' }
+    ],
+    answer: 'C',
+    explanation: 'Thank you 是谢谢的标准表达，Sorry 是对不起，Hello 是你好，Goodbye 是再见。',
+    tags: ['日常用语', '礼貌用语']
+  },
+  {
+    type: 'choice',
+    difficulty: 'easy',
+    question: '「今天天气很好」的英文翻译是？',
+    options: [
+      { label: 'A', text: 'The weather is bad today.' },
+      { label: 'B', text: 'The weather is good today.' },
+      { label: 'C', text: 'Today is Monday.' },
+      { label: 'D', text: 'I like today.' }
+    ],
+    answer: 'B',
+    explanation: 'weather 意为天气，good 意为好，bad 意为坏。正确翻译应表达"今天天气很好"。',
+    tags: ['日常表达', '天气']
+  },
+  
+  // ===== 中等选择题 =====
+  {
+    type: 'choice',
+    difficulty: 'medium',
+    question: '「The book on the table is mine.」中划线部分的语法功能是？',
+    options: [
+      { label: 'A', text: '主语' },
+      { label: 'B', text: '宾语' },
+      { label: 'C', text: '定语' },
+      { label: 'D', text: '状语' }
+    ],
+    answer: 'C',
+    explanation: '"on the table" 是介词短语作后置定语，修饰名词 book，表示"桌子上的书"。',
+    tags: ['语法', '定语', '介词短语']
+  },
+  {
+    type: 'choice',
+    difficulty: 'medium',
+    question: '「他昨天没有去学校，因为他生病了。」的最佳英文翻译是？',
+    options: [
+      { label: 'A', text: 'He didn\'t go to school yesterday because he is sick.' },
+      { label: 'B', text: 'He didn\'t go to school yesterday because he was sick.' },
+      { label: 'C', text: 'He doesn\'t go to school yesterday because he was sick.' },
+      { label: 'D', text: 'He not go to school yesterday because he sick.' }
+    ],
+    answer: 'B',
+    explanation: '过去发生的事情应用过去时态，"didn\'t go" 是正确否定形式，"was sick" 与 yesterday 时间一致。',
+    tags: ['时态', '翻译技巧', '过去时']
+  },
+  {
+    type: 'choice',
+    difficulty: 'medium',
+    question: '「Neural Machine Translation」的准确中文翻译是？',
+    options: [
+      { label: 'A', text: '神经语言翻译' },
+      { label: 'B', text: '神经机器翻译' },
+      { label: 'C', text: '神经网络翻译' },
+      { label: 'D', text: '智能机器翻译' }
+    ],
+    answer: 'B',
+    explanation: 'Neural Machine Translation (NMT) 标准译名为"神经机器翻译"，是一种使用人工神经网络的机器翻译方法。',
+    tags: ['专业术语', '翻译技术']
+  },
+  {
+    type: 'choice',
+    difficulty: 'medium',
+    question: '以下哪个翻译最符合「创译」(Transcreation) 的定义？',
+    options: [
+      { label: 'A', text: '逐字翻译原文内容' },
+      { label: 'B', text: '使用机器翻译后人工校对' },
+      { label: 'C', text: '在保持原文意图基础上进行创造性改编' },
+      { label: 'D', text: '将原文翻译成多种语言' }
+    ],
+    answer: 'C',
+    explanation: '创译(Transcreation)是在保持原文意图、风格和情感的基础上，对内容进行创造性改编，使其更符合目标文化的表达习惯。',
+    tags: ['翻译理论', '创译', '本地化']
+  },
+  {
+    type: 'choice',
+    difficulty: 'medium',
+    question: '「The company has been working on this project for three years.」的正确翻译是？',
+    options: [
+      { label: 'A', text: '公司在这个项目上工作了三年。' },
+      { label: 'B', text: '公司一直在做这个项目三年了。' },
+      { label: 'C', text: '这家公司从事这个项目已经三年了。' },
+      { label: 'D', text: '公司完成了这个项目三年。' }
+    ],
+    answer: 'C',
+    explanation: 'has been working 是现在完成进行时，表示从过去持续到现在的动作。翻译时需体现"一直在做"的含义，同时保持中文表达的自然流畅。',
+    tags: ['时态', '完成进行时', '翻译技巧']
+  },
+  
+  // ===== 困难选择题 =====
+  {
+    type: 'choice',
+    difficulty: 'hard',
+    question: '「信达雅」翻译标准最早由谁提出？',
+    options: [
+      { label: 'A', text: '林语堂' },
+      { label: 'B', text: '严复' },
+      { label: 'C', text: '鲁迅' },
+      { label: 'D', text: '傅雷' }
+    ],
+    answer: 'B',
+    explanation: '「信达雅」是严复在《天演论》译例言中提出的翻译标准：信(faithfulness)忠实原文，达(expressiveness)通顺流畅，雅(elegance)文辞典雅。',
+    tags: ['翻译理论', '翻译史', '严复']
+  },
+  {
+    type: 'choice',
+    difficulty: 'hard',
+    question: '「The translation was so literal that it lost the original\'s poetic beauty.」的最佳翻译是？',
+    options: [
+      { label: 'A', text: '翻译太字面了，失去了原文的诗歌美。' },
+      { label: 'B', text: '译文过于直译，丧失了原作的诗意之美。' },
+      { label: 'C', text: '这个翻译太直白，原文的诗意都没了。' },
+      { label: 'D', text: '翻译太过忠实，导致原文的诗意荡然无存。' }
+    ],
+    answer: 'B',
+    explanation: '翻译时应注意：1) literal 译为"直译"更专业；2) poetic beauty 译为"诗意之美"更具文学性；3) 整体表达应体现评论的学术性。',
+    tags: ['文学翻译', '翻译批评', '高级表达']
+  },
+  {
+    type: 'choice',
+    difficulty: 'hard',
+    question: '在法律合同翻译中，「Force Majeure」的标准中文译名是？',
+    options: [
+      { label: 'A', text: '强制力' },
+      { label: 'B', text: '不可抗力' },
+      { label: 'C', text: '意外事件' },
+      { label: 'D', text: '天灾人祸' }
+    ],
+    answer: 'B',
+    explanation: 'Force Majeure 是法律术语，标准译名为"不可抗力"，指不能预见、不能避免并不能克服的客观情况，是合同中的标准免责条款。',
+    tags: ['法律翻译', '专业术语', '合同']
+  },
+  
+  // ===== 简单填空题 =====
+  {
+    type: 'fill',
+    difficulty: 'easy',
+    question: '请将「Good morning」翻译成中文：',
+    answer: '早上好',
+    explanation: 'Good morning 是早晨问候语，标准翻译为"早上好"或"早安"。',
+    tags: ['日常用语', '问候语']
+  },
+  {
+    type: 'fill',
+    difficulty: 'easy',
+    question: '请将「我爱你」翻译成英文：',
+    answer: 'I love you',
+    explanation: '这是最基础的情感表达，I love you 是标准翻译。',
+    tags: ['基础表达', '情感']
+  },
+  {
+    type: 'fill',
+    difficulty: 'easy',
+    question: '请将「谢谢你的帮助」翻译成英文：',
+    answer: 'Thank you for your help',
+    explanation: 'Thank you for... 是表示感谢的常用句型，help 意为帮助。',
+    tags: ['日常用语', '感谢']
+  },
+  {
+    type: 'fill',
+    difficulty: 'easy',
+    question: '请将「How are you?」翻译成中文：',
+    answer: '你好吗',
+    explanation: 'How are you? 是英语中最常用的问候语，询问对方近况。',
+    tags: ['日常用语', '问候语']
+  },
+  
+  // ===== 中等填空题 =====
+  {
+    type: 'fill',
+    difficulty: 'medium',
+    question: '请将「Translation is an art that requires both linguistic competence and cultural sensitivity.」翻译成中文：',
+    answer: '翻译是一门艺术，需要语言能力和文化敏感度。',
+    explanation: 'linguistic competence 译为"语言能力"，cultural sensitivity 译为"文化敏感度"。翻译时注意保持学术性表达。',
+    tags: ['翻译理论', '学术表达']
+  },
+  {
+    type: 'fill',
+    difficulty: 'medium',
+    question: '请将「机器翻译正在改变翻译行业的工作方式」翻译成英文：',
+    answer: 'Machine translation is changing the way the translation industry works.',
+    explanation: '"正在改变"用现在进行时 is changing，"工作方式"译为 the way...works 或 working methods。',
+    tags: ['翻译技术', '行业表达']
+  },
+  {
+    type: 'fill',
+    difficulty: 'medium',
+    question: '请将「CAT工具可以显著提高翻译效率」翻译成英文：',
+    answer: 'CAT tools can significantly improve translation efficiency.',
+    explanation: 'CAT (Computer-Assisted Translation) 工具是翻译行业常用术语，significantly 表示"显著地"。',
+    tags: ['翻译工具', '专业术语']
+  },
+  
+  // ===== 困难填空题 =====
+  {
+    type: 'fill',
+    difficulty: 'hard',
+    question: '请将「The translator must be a master of two languages and cultures, serving as an invisible bridge between the source and target texts.」翻译成中文：',
+    answer: '译者必须是两种语言和文化的精通者，充当源文本与目标文本之间无形的桥梁。',
+    explanation: 'master 译为"精通者"，invisible bridge 译为"无形的桥梁"，source and target texts 是翻译学术语"源文本与目标文本"。',
+    tags: ['翻译理论', '高级翻译', '学术表达']
+  },
+  {
+    type: 'fill',
+    difficulty: 'hard',
+    question: '请将「译者的任务是忠实地传达原文的内容、风格和神韵，同时使译文符合目标语言的表达习惯。」翻译成英文：',
+    answer: 'The translator\'s task is to faithfully convey the content, style and spirit of the original text while making the translation conform to the expression habits of the target language.',
+    explanation: '"忠实地传达"译为 faithfully convey，"神韵"可译为 spirit 或 charm，"表达习惯"译为 expression habits 或 linguistic conventions。',
+    tags: ['翻译理论', '高级表达', '翻译标准']
+  }
+];
+
 router.post('/init-sample-data', protect, authorize('teacher'), async (req, res) => {
   try {
     // 清空现有数据
     await Term.deleteMany({});
     await Case.deleteMany({});
+    await Question.deleteMany({});
 
     // 插入示例数据
     const terms = await Term.insertMany(sampleTerms);
     const cases = await Case.insertMany(sampleCases);
+    
+    // 插入题目数据，添加 createdBy 字段
+    const questionsWithCreator = sampleQuestions.map(q => ({
+      ...q,
+      createdBy: req.user._id
+    }));
+    const questions = await Question.insertMany(questionsWithCreator);
 
     res.json({
       success: true,
       message: '✅ 示例数据初始化成功',
       data: {
         termsCreated: terms.length,
-        casesCreated: cases.length
+        casesCreated: cases.length,
+        questionsCreated: questions.length
       }
     });
   } catch (error) {
