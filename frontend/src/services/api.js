@@ -59,26 +59,6 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
 };
 
-// 课程相关API（示例约定，后端可按需适配）
-export const coursesAPI = {
-  // 班级
-  listClasses: () => api.get('/courses/classes'),
-  joinClass: (code) => api.post('/courses/join', { code }),
-  leaveClass: (classId) => api.delete(`/courses/classes/${classId}`),
-
-  // 术语库
-  listTerms: (params) => api.get('/courses/terms', { params }),
-  createTerm: (payload) => api.post('/courses/terms', payload),
-  updateTerm: (id, payload) => api.put(`/courses/terms/${id}`, payload),
-  deleteTerm: (id) => api.delete(`/courses/terms/${id}`),
-
-  // 案例库
-  listCases: (params) => api.get('/courses/cases', { params }),
-  createCase: (payload) => api.post('/courses/cases', payload),
-  updateCase: (id, payload) => api.put(`/courses/cases/${id}`, payload),
-  deleteCase: (id) => api.delete(`/courses/cases/${id}`),
-};
-
 export default api;
 
 

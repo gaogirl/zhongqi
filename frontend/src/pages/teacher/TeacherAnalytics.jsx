@@ -161,15 +161,15 @@ export default function TeacherAnalytics() {
                       <div key={sub._id} className="submission-item">
                         <div className="submission-info">
                           <div className="submission-student">{sub.student?.name || '学生'}</div>
-                          <div className="submission-time">{formatDate(sub.submittedAt)}</div>
+                          <div className="submission-time">{formatDate(sub.createdAt)}</div>
                         </div>
                         <div className="submission-status">
-                          {sub.score !== null && sub.score !== undefined ? (
+                          {sub.totalScore !== null && sub.totalScore !== undefined ? (
                             <span className="score-badge" style={{ 
-                              background: getScoreColor(sub.score) + '20',
-                              color: getScoreColor(sub.score)
+                              background: getScoreColor(sub.totalScore) + '20',
+                              color: getScoreColor(sub.totalScore)
                             }}>
-                              {sub.score}分
+                              {sub.totalScore}分
                             </span>
                           ) : (
                             <span className="status-badge pending">待批改</span>

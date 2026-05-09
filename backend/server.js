@@ -22,14 +22,17 @@ const cookieParser = require('cookie-parser');
 const path = require('path');
 
 // 加载环境变量
-console.log('正在加载环境变量...');
 dotenv.config();
 
-// 调试环境变量
-console.log('环境变量加载结果:');
-console.log('MONGO_URI是否存在:', process.env.MONGO_URI ? '是' : '否');
-console.log('CLIENT_URL是否存在:', process.env.CLIENT_URL ? '是' : '否');
-console.log('ZHIPU_API_KEY是否存在:', process.env.ZHIPU_API_KEY ? '是' : '否');
+// 生产环境检查必需的环境变量
+if (!process.env.MONGO_URI) {
+  console.error('错误: MONGO_URI 环境变量未设置');
+  process.exit(1);
+}
+if (!process.env.JWT_SECRET) {
+  console.error('错误: JWT_SECRET 环境变量未设置');
+  process.exit(1);
+}
 
 // 导入路由
 const auth = require('./routes/api/auth');
@@ -72,13 +75,12 @@ app.use(cookieParser());
 
 // 数据库配置
 const db = process.env.MONGO_URI;
-console.log('数据库连接URI:', db);
 
 // 连接到 MongoDB
 mongoose
     .connect(db)
     .then(() => console.log('MongoDB 已成功连接'))
-    .catch(err => console.log(err));
+    .catch(err => console.error('MongoDB 连接失败:', err.message));
 
 // 静态资源（音频上传）
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
