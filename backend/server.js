@@ -45,6 +45,7 @@ const evalRoutes = require('./routes/api/eval');
 const libraryRoutes = require('./routes/api/library');
 const uploadRoutes = require('./routes/api/upload');
 const usersRoutes = require('./routes/api/users');
+const questionsRoutes = require('./routes/api/questions');
 
 const app = express();
 
@@ -99,6 +100,7 @@ app.use('/api/eval', evalRoutes);
 app.use('/api/library', libraryRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/questions', questionsRoutes);
 
 // 基础路由
 app.get('/', (req, res) => {

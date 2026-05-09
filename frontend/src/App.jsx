@@ -10,6 +10,7 @@ import StudentCaseDetail from './pages/student/StudentCaseDetail';
 import StudentLibrary from './pages/student/StudentLibrary';
 import TeacherTerms from './pages/teacher/TeacherTerms';
 import TeacherCases from './pages/teacher/TeacherCases';
+import TeacherQuestions from './pages/teacher/TeacherQuestions';
 import TeacherLayout from './pages/teacher/TeacherLayout';
 import TeacherHome from './pages/teacher/TeacherHome';
 import TeacherAIChat from './pages/TeacherAIChat';
@@ -29,6 +30,7 @@ import StudentClasses from './pages/student/StudentClasses';
 import StudentClassDetail from './pages/student/StudentClassDetail';
 import StudentAssignmentDetail from './pages/student/StudentAssignmentDetail';
 import StudentAIInterpret from './pages/student/StudentAIInterpret';
+import StudentPractice from './pages/student/StudentPractice';
 import './App.css';
 
 function App() {
@@ -58,6 +60,7 @@ function App() {
               <Route path="assignments/:id" element={<StudentAssignmentDetail />} />
               <Route path="courses" element={<StudentCourses />} />
               <Route path="profile" element={<StudentProfile />} />
+              <Route path="practice" element={<StudentPractice />} />
             </Route>
             {/* 兼容旧路径，重定向到新首页 */}
             <Route path="/student/dashboard" element={<Navigate to="/student" replace />} />
@@ -76,6 +79,7 @@ function App() {
               <Route path="analytics" element={<TeacherAnalytics />} />
               <Route path="terms" element={<TeacherTerms />} />
               <Route path="cases" element={<TeacherCases />} />
+              <Route path="questions" element={<TeacherQuestions />} />
             </Route>
             <Route path="/teacher/dashboard" element={<Navigate to="/teacher" replace />} />
           </Route>

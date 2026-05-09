@@ -24,6 +24,7 @@ const StudentLayout = () => {
           <NavLink to="/student/ai" className={({isActive}) => isActive ? 'tab active' : 'tab'}>智能对话</NavLink>
           <NavLink to="/student/ai-interp" className={({ isActive }) => isActive ? 'tab active' : 'tab'}>AI口译</NavLink>
           <NavLink to="/student/library" className={({isActive}) => isActive ? 'tab active' : 'tab'}>资料库</NavLink>
+          <NavLink to="/student/practice" className={({isActive}) => isActive ? 'tab active' : 'tab'}>练习</NavLink>
           <NavLink to="/student/classes" className={({isActive}) => isActive ? 'tab active' : 'tab'}>我的班级</NavLink>
           <NavLink to="/student/courses" className={({isActive}) => isActive ? 'tab active' : 'tab'}>课程</NavLink>
           <NavLink to="/student/profile" className={({isActive}) => isActive ? 'tab active' : 'tab'}>个人</NavLink>

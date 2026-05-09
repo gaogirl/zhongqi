@@ -26,6 +26,7 @@ export default function TeacherLayout() {
           <NavLink to="/teacher/assignments" className={({isActive}) => isActive ? 'tab active' : 'tab'}>作业管理</NavLink>
           <NavLink to="/teacher/terms" className={({isActive}) => isActive ? 'tab active' : 'tab'}>术语库</NavLink>
           <NavLink to="/teacher/cases" className={({isActive}) => isActive ? 'tab active' : 'tab'}>案例库</NavLink>
+          <NavLink to="/teacher/questions" className={({isActive}) => isActive ? 'tab active' : 'tab'}>题库</NavLink>
           <NavLink to="/teacher/analytics" className={({isActive}) => isActive ? 'tab active' : 'tab'}>数据看板</NavLink>
         </nav>
         <div className="userbox">
