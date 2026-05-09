@@ -39,8 +39,7 @@ export default function StudentPractice() {
     setErr('');
     try {
       const res = await questionsAPI.practice({ difficulty, count });
-      const data = res.data || res;
-      const list = data.questions || data.list || data || [];
+      const list = res.data?.data || res.data?.questions || res.data?.list || [];
       if (!Array.isArray(list) || list.length === 0) {
         setErr('暂无符合条件的题目，请更换筛选条件');
         return;

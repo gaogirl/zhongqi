@@ -1,17 +1,27 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { chatRequest } from '../services/ai';
 import './AIChat.css';
+
+// 模块级缓存 - 在单次登录内切换页面不丢失对话
+const chatCache = new Map();
 
 // 通用 AI 对话组件（支持 glm-4.5 与 glm-4.5-flash，支持流式）
 export default function AIChat({ defaultModel = 'glm-4.5' }) {
   const [model, setModel] = useState(defaultModel);
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState([]); // {role, content}
+  const cacheKey = model; // 按模型分别缓存
+  const [messages, setMessages] = useState(() => chatCache.get(cacheKey) || []); // {role, content}
   const [streaming, setStreaming] = useState(false);
   const [error, setError] = useState('');
   const outputRef = useRef(null);
 
   const canSend = useMemo(() => input.trim().length > 0 && !streaming, [input, streaming]);
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      chatCache.set(cacheKey, messages);
+    }
+  }, [messages, cacheKey]);
 
   const scrollToBottom = () => {
     try {
@@ -64,6 +74,7 @@ export default function AIChat({ defaultModel = 'glm-4.5' }) {
   const onClear = () => {
     setMessages([]);
     setError('');
+    chatCache.delete(cacheKey);
   };
 
   return (

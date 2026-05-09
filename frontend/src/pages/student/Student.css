@@ -82,8 +82,8 @@
 .selects { display: flex; gap: 10px; }
 .selects label { display: grid; gap: 6px; font-size: 12px; color: #555; }
 .selects select { padding: 8px 10px; border-radius: 8px; border: 1px solid #dee2e6; background: #fff; }
-.trans-area { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.trans-area textarea { min-height: 220px; padding: 10px; border-radius: 10px; border: 1px solid #dee2e6; resize: vertical; font-size: 14px; }
+.trans-area { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.trans-area textarea { min-height: 220px; padding: 12px; border-radius: 10px; border: 1px solid #dee2e6; resize: vertical; font-size: 14px; background: #fff; }
 
 .btn { padding: 10px 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; }
 .btn.primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }

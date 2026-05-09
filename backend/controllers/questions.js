@@ -82,6 +82,11 @@ exports.getRandom = async (req, res) => {
       match.type = type;
     }
 
+    const totalAvailable = await Question.countDocuments(match);
+    if (totalAvailable === 0) {
+      return res.json({ success: true, count: 0, data: [] });
+    }
+
     const questions = await Question.aggregate([
       { $match: match },
       { $sample: { size: numCount } },
@@ -137,7 +142,8 @@ exports.checkAnswers = async (req, res) => {
         };
       }
 
-      const isCorrect = a.userAnswer && a.userAnswer.trim().toUpperCase() === q.answer.trim().toUpperCase();
+      const userAns = (a.userAnswer || '').trim();
+      const isCorrect = userAns !== '' && userAns.toUpperCase() === q.answer.trim().toUpperCase();
       if (isCorrect) correctCount++;
 
       return {

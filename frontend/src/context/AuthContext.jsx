@@ -145,10 +145,11 @@ export const AuthProvider = ({ children }) => {
       const { token, user: userInfo } = response.data;
       
       localStorage.setItem('token', token);
+      localStorage.setItem('last_email', credentials.email);
       localStorage.setItem('user', JSON.stringify(userInfo));
       setUser(userInfo);
       setIsAuthenticated(true);
-      
+
       return { success: true, user: userInfo };
     } catch (error) {
       // 远端失败则尝试本地登录兜底
@@ -168,6 +169,7 @@ export const AuthProvider = ({ children }) => {
     }
     const token = `local-${found.id}`;
     localStorage.setItem('token', token);
+    localStorage.setItem('last_email', credentials.email);
     localStorage.setItem('user', JSON.stringify(found));
     setUser(found);
     setIsAuthenticated(true);

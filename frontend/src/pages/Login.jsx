@@ -5,7 +5,7 @@ import './Login.css';
 
 const Login = () => {
     const [formData, setFormData] = useState({
-        email: '',
+        email: localStorage.getItem('last_email') || '',
         password: ''
     });
     const [userRole, setUserRole] = useState('student'); // 选择登录角色
