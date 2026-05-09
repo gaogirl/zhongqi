@@ -1,53 +1,22 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { API_BASE } from '../../services/ai';
 import evalAPI from '../../services/eval';
 import './Student.css';
 
 export default function StudentAIInterpret() {
   const [direction, setDirection] = useState('zh-en');
-  const [src, setSrc] = useState('');
-  const [refText, setRefText] = useState('');
-  const [myText, setMyText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
+  const [sourceText, setSourceText] = useState('');
+  const [userTranslation, setUserTranslation] = useState('');
+  const [aiTranslation, setAiTranslation] = useState('');
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [step, setStep] = useState(1); // 1: 输入原文, 2: 翻译, 3: 查看结果
 
   const targetLang = useMemo(() => (direction === 'zh-en' ? 'en' : 'zh'), [direction]);
 
-  const genReference = async () => {
-    if (!src.trim()) return;
-    setErr('');
-    setLoading(true);
-    try {
-      const resp = await fetch(`${API_BASE}/translate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: src, targetLang, stream: false, model: 'glm-4.5' })
-      });
-      if (!resp.ok) throw new Error(await resp.text());
-      const data = await resp.json();
-      setRefText(data.translation || '');
-    } catch (e) {
-      setErr(e?.message || '生成参考译文失败');
-    } finally { setLoading(false); }
-  };
-
-  const clearAll = () => {
-    setSrc(''); setRefText(''); setMyText(''); setResult(null); setErr('');
-  };
-
-  const onEvaluate = async () => {
-    if (!src.trim() || !myText.trim()) { setErr('请先输入原文与译文'); return; }
-    setLoading(true); setErr(''); setResult(null);
-    try {
-      const resp = await evalAPI.evaluateTranslation({ direction, sourceText: src, studentText: myText, refText });
-      const data = resp.data || resp;
-      setResult(data.result || null);
-    } catch (e) {
-      setErr(e?.response?.data?.error || e?.message || '评估失败');
-    } finally { setLoading(false); }
-  };
-
+  // 获取分数颜色
   const getScoreColor = (score) => {
     if (score >= 90) return '#22c55e';
     if (score >= 70) return '#3b82f6';
@@ -55,152 +24,257 @@ export default function StudentAIInterpret() {
     return '#ef4444';
   };
 
+  // 清空所有内容
+  const handleClear = () => {
+    setSourceText('');
+    setUserTranslation('');
+    setAiTranslation('');
+    setResult(null);
+    setError('');
+    setStep(1);
+  };
+
+  // 步骤1完成，进入步骤2
+  const handleNextStep = () => {
+    if (!sourceText.trim()) {
+      setError('请输入原文');
+      return;
+    }
+    setError('');
+    setStep(2);
+  };
+
+  // 提交评估
+  const handleSubmit = async () => {
+    if (!userTranslation.trim()) {
+      setError('请输入你的翻译');
+      return;
+    }
+    
+    setLoading(true);
+    setAiLoading(true);
+    setError('');
+    setResult(null);
+    setAiTranslation('');
+
+    try {
+      // 并行执行：AI翻译 + 评分
+      const [transRes, evalRes] = await Promise.all([
+        // AI翻译
+        fetch(`${API_BASE}/translate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            text: sourceText, 
+            targetLang, 
+            stream: false, 
+            model: 'glm-4.5' 
+          })
+        }).then(r => r.json()),
+        // 评分评估
+        evalAPI.evaluateTranslation({
+          direction,
+          sourceText,
+          studentText: userTranslation,
+          refText: '' // 不提供参考译文，让AI自己判断
+        }).then(r => r.data || r)
+      ]);
+
+      setAiTranslation(transRes.translation || '');
+      setResult(evalRes.result || null);
+      setStep(3);
+    } catch (e) {
+      setError(e?.message || '评估失败，请重试');
+    } finally {
+      setLoading(false);
+      setAiLoading(false);
+    }
+  };
+
+  // 重新开始
+  const handleRestart = () => {
+    handleClear();
+  };
+
   return (
-    <div className="eval-page">
+    <div className="interpret-page">
       {/* 头部 */}
-      <div className="eval-header">
-        <div className="eval-header-content">
+      <div className="interpret-header">
+        <div className="header-left">
           <h1>🎯 翻译质量评估系统</h1>
-          <p>基于 AI 的智能翻译评估工具，多维度分析译文质量</p>
+          <p>输入原文 → 完成翻译 → AI智能评分</p>
+        </div>
+        <div className="header-right">
+          <div className="direction-switch">
+            <button 
+              className={direction === 'zh-en' ? 'active' : ''}
+              onClick={() => setDirection('zh-en')}
+            >
+              中 → 英
+            </button>
+            <button 
+              className={direction === 'en-zh' ? 'active' : ''}
+              onClick={() => setDirection('en-zh')}
+            >
+              英 → 中
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 步骤指示器 */}
-      <div className="eval-steps">
-        <div className={`eval-step ${src ? 'completed' : 'active'}`}>
+      <div className="interpret-steps">
+        <div className={`step-item ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
           <span className="step-num">1</span>
           <span className="step-text">输入原文</span>
         </div>
         <div className="step-line"></div>
-        <div className={`eval-step ${myText ? 'completed' : src ? 'active' : ''}`}>
+        <div className={`step-item ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
           <span className="step-num">2</span>
-          <span className="step-text">提交译文</span>
+          <span className="step-text">完成翻译</span>
         </div>
         <div className="step-line"></div>
-        <div className={`eval-step ${result ? 'completed' : ''}`}>
+        <div className={`step-item ${step >= 3 ? 'active' : ''}`}>
           <span className="step-num">3</span>
-          <span className="step-text">查看评估</span>
+          <span className="step-text">查看评分</span>
         </div>
       </div>
 
       {/* 主内容区 */}
-      <div className="eval-main">
-        {/* 左侧：输入区 */}
-        <div className="eval-input-section">
-          {/* 翻译方向 */}
-          <div className="eval-direction">
-            <button 
-              className={`dir-btn ${direction === 'zh-en' ? 'active' : ''}`}
-              onClick={() => setDirection('zh-en')}
-            >
-              <span className="dir-arrow">中文</span>
-              <span className="dir-icon">→</span>
-              <span className="dir-arrow">英文</span>
-            </button>
-            <button 
-              className={`dir-btn ${direction === 'en-zh' ? 'active' : ''}`}
-              onClick={() => setDirection('en-zh')}
-            >
-              <span className="dir-arrow">英文</span>
-              <span className="dir-icon">→</span>
-              <span className="dir-arrow">中文</span>
-            </button>
+      <div className="interpret-main">
+        {/* 左侧：原文区 */}
+        <div className="interpret-panel source-panel">
+          <div className="panel-header">
+            <span className="panel-icon">📝</span>
+            <span className="panel-title">
+              {direction === 'zh-en' ? '中文原文' : '英文原文'}
+            </span>
+            <span className="panel-count">{sourceText.length} 字</span>
           </div>
-
-          {/* 原文输入 */}
-          <div className="eval-textarea-wrap">
-            <label>📝 原文</label>
-            <textarea 
-              placeholder="请输入需要翻译的原文..." 
-              value={src} 
-              onChange={e => setSrc(e.target.value)}
-              rows={4}
-            />
-            <div className="textarea-footer">
-              <span className="char-count">{src.length} 字</span>
+          <textarea
+            className="panel-textarea"
+            placeholder={direction === 'zh-en' 
+              ? '请输入需要翻译的中文文本...' 
+              : 'Please enter the English text to translate...'}
+            value={sourceText}
+            onChange={(e) => setSourceText(e.target.value)}
+            disabled={step > 1}
+          />
+          {step === 1 && (
+            <div className="panel-actions">
+              <button className="btn-clear" onClick={handleClear}>
+                清空
+              </button>
+              <button 
+                className="btn-next" 
+                onClick={handleNextStep}
+                disabled={!sourceText.trim()}
+              >
+                下一步 →
+              </button>
             </div>
-          </div>
-
-          {/* 译文输入 */}
-          <div className="eval-textarea-wrap">
-            <label>✍️ 我的译文</label>
-            <textarea 
-              placeholder="请输入你的翻译..." 
-              value={myText} 
-              onChange={e => setMyText(e.target.value)}
-              rows={4}
-            />
-            <div className="textarea-footer">
-              <span className="char-count">{myText.length} 字</span>
-            </div>
-          </div>
-
-          {/* 参考译文 */}
-          <div className="eval-textarea-wrap reference">
-            <label>📖 参考译文 <span className="label-note">(AI生成)</span></label>
-            <textarea 
-              placeholder="点击「生成参考译文」按钮..." 
-              value={refText} 
-              onChange={e => setRefText(e.target.value)}
-              rows={3}
-            />
-          </div>
-
-          {/* 操作按钮 */}
-          <div className="eval-actions">
-            <button className="btn-secondary" onClick={genReference} disabled={loading || !src}>
-              {loading ? '⏳ 生成中...' : '🔄 生成参考译文'}
-            </button>
-            <button className="btn-primary" onClick={onEvaluate} disabled={loading || !src || !myText}>
-              {loading ? '⏳ 评估中...' : '🚀 开始评估'}
-            </button>
-            <button className="btn-ghost" onClick={clearAll}>
-              🗑️ 清空
-            </button>
-          </div>
-
-          {err && <div className="eval-error">❌ {err}</div>}
+          )}
         </div>
 
-        {/* 右侧：结果区 */}
-        <div className="eval-result-section">
-          {!result ? (
-            <div className="eval-empty">
-              <div className="empty-icon">📊</div>
-              <h3>评估结果</h3>
-              <p>输入原文和译文后，点击「开始评估」查看分析结果</p>
+        {/* 中间：用户翻译区 */}
+        <div className="interpret-panel user-panel">
+          <div className="panel-header">
+            <span className="panel-icon">✍️</span>
+            <span className="panel-title">我的翻译</span>
+            <span className="panel-count">{userTranslation.length} 字</span>
+          </div>
+          <textarea
+            className="panel-textarea"
+            placeholder={direction === 'zh-en' 
+              ? 'Please translate into English...' 
+              : '请翻译成中文...'}
+            value={userTranslation}
+            onChange={(e) => setUserTranslation(e.target.value)}
+            disabled={step === 3}
+          />
+          {step === 2 && (
+            <div className="panel-actions">
+              <button className="btn-back" onClick={() => setStep(1)}>
+                ← 上一步
+              </button>
+              <button 
+                className="btn-submit" 
+                onClick={handleSubmit}
+                disabled={!userTranslation.trim() || loading}
+              >
+                {loading ? '评估中...' : '提交评估 🚀'}
+              </button>
             </div>
-          ) : (
-            <>
-              {/* 评分概览 */}
-              <div className="eval-scores">
-                <div className="score-main">
-                  <div className="score-circle" style={{ 
-                    background: `conic-gradient(${getScoreColor(result.overall)} ${result.overall}%, #f0f0f5 0)`
-                  }}>
+          )}
+        </div>
+
+        {/* 右侧：AI翻译和评分区 */}
+        <div className="interpret-panel result-panel">
+          {/* AI翻译 */}
+          <div className="result-section ai-translation">
+            <div className="section-header">
+              <span className="section-icon">🤖</span>
+              <span className="section-title">AI参考译文</span>
+              {aiLoading && <span className="loading-dot">生成中...</span>}
+            </div>
+            <div className="section-content">
+              {aiTranslation || (
+                <span className="placeholder">
+                  {step < 3 ? '提交后将显示AI翻译结果' : '暂无翻译结果'}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* 评分结果 */}
+          <div className="result-section score-section">
+            <div className="section-header">
+              <span className="section-icon">📊</span>
+              <span className="section-title">评分结果</span>
+            </div>
+            
+            {!result ? (
+              <div className="score-empty">
+                <div className="empty-icon">📈</div>
+                <p>提交翻译后查看评分</p>
+              </div>
+            ) : (
+              <div className="score-content">
+                {/* 综合评分 */}
+                <div className="overall-score">
+                  <div 
+                    className="score-ring"
+                    style={{
+                      background: `conic-gradient(${getScoreColor(result.overall)} ${result.overall * 3.6}deg, #f0f0f5 0deg)`
+                    }}
+                  >
                     <div className="score-inner">
-                      <span className="score-value">{result.overall}</span>
+                      <span className="score-number" style={{ color: getScoreColor(result.overall) }}>
+                        {result.overall}
+                      </span>
                       <span className="score-label">综合评分</span>
                     </div>
                   </div>
                 </div>
-                <div className="score-details">
+
+                {/* 分项评分 */}
+                <div className="detail-scores">
                   {[
                     { key: 'accuracy', label: '准确性', icon: '🎯' },
                     { key: 'fidelity', label: '忠实度', icon: '📋' },
                     { key: 'fluency', label: '流畅度', icon: '💬' },
                     { key: 'grammar', label: '语法', icon: '📝' },
                   ].map(item => (
-                    <div key={item.key} className="score-item">
-                      <div className="score-item-header">
+                    <div key={item.key} className="detail-item">
+                      <div className="detail-header">
                         <span>{item.icon} {item.label}</span>
-                        <span className="score-item-value" style={{ color: getScoreColor(result[item.key]) }}>
+                        <span style={{ color: getScoreColor(result[item.key]), fontWeight: 700 }}>
                           {result[item.key]}
                         </span>
                       </div>
-                      <div className="score-bar">
+                      <div className="detail-bar">
                         <div 
-                          className="score-bar-fill" 
+                          className="detail-fill"
                           style={{ 
                             width: `${result[item.key]}%`,
                             background: getScoreColor(result[item.key])
@@ -210,19 +284,35 @@ export default function StudentAIInterpret() {
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* AI 建议 */}
-              <div className="eval-suggestions">
-                <h3>💡 AI 评估建议</h3>
-                <div className="suggestions-content">
-                  {result.suggestions || '暂无建议'}
-                </div>
+                {/* AI建议 */}
+                {result.suggestions && (
+                  <div className="ai-suggestions">
+                    <div className="suggestion-header">💡 AI建议</div>
+                    <div className="suggestion-content">{result.suggestions}</div>
+                  </div>
+                )}
               </div>
-            </>
+            )}
+          </div>
+
+          {/* 重新开始按钮 */}
+          {step === 3 && (
+            <div className="panel-actions">
+              <button className="btn-restart" onClick={handleRestart}>
+                🔄 重新开始
+              </button>
+            </div>
           )}
         </div>
       </div>
+
+      {/* 错误提示 */}
+      {error && (
+        <div className="interpret-error">
+          ❌ {error}
+        </div>
+      )}
     </div>
   );
 }
