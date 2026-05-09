@@ -66,6 +66,9 @@ mongoose
 // 静态资源（音频上传）
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+// 初始化示例数据 API（生产环境初始化后可删除此行）
+app.use('/api', require('./routes/api/init'));
+
 // 使用路由
 app.use('/api/auth', auth);
 app.use('/api/chat', chat);
