@@ -176,6 +176,35 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
+.model-switch {
+  display: flex;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 4px;
+  margin-left: 12px;
+}
+
+.model-switch button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.model-switch button.active {
+  background: #fff;
+  color: #667eea;
+}
+
+.model-switch button:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* 步骤指示器 */
 .interpret-steps {
   display: flex;

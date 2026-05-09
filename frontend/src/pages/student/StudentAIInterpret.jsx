@@ -5,6 +5,7 @@ import './Student.css';
 
 export default function StudentAIInterpret() {
   const [direction, setDirection] = useState('zh-en');
+  const [model, setModel] = useState('glm-4-flash'); // 默认使用快速模型
   const [sourceText, setSourceText] = useState('');
   const [userTranslation, setUserTranslation] = useState('');
   const [aiTranslation, setAiTranslation] = useState('');
@@ -68,7 +69,7 @@ export default function StudentAIInterpret() {
             text: sourceText, 
             targetLang, 
             stream: false, 
-            model: 'glm-4.5' 
+            model 
           })
         }).then(r => r.json()),
         // 评分评估
@@ -76,7 +77,8 @@ export default function StudentAIInterpret() {
           direction,
           sourceText,
           studentText: userTranslation,
-          refText: '' // 不提供参考译文，让AI自己判断
+          refText: '',
+          model
         }).then(r => r.data || r)
       ]);
 
@@ -117,6 +119,22 @@ export default function StudentAIInterpret() {
               onClick={() => setDirection('en-zh')}
             >
               英 → 中
+            </button>
+          </div>
+          <div className="model-switch">
+            <button 
+              className={model === 'glm-4-flash' ? 'active' : ''}
+              onClick={() => setModel('glm-4-flash')}
+              title="快速响应，适合日常使用"
+            >
+              ⚡ 快速
+            </button>
+            <button 
+              className={model === 'glm-4.5-flash' ? 'active' : ''}
+              onClick={() => setModel('glm-4.5-flash')}
+              title="更高质量，适合专业翻译"
+            >
+              🎯 精准
             </button>
           </div>
         </div>

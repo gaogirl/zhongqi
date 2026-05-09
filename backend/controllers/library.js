@@ -25,9 +25,16 @@ exports.listTerms = async (req, res) => {
 
 exports.createTerm = async (req, res) => {
   try {
-    const { term, meaning, cat } = req.body || {};
+    const { term, meaning, cat, icon, difficulty } = req.body || {};
     if (!term || !meaning) return res.status(400).json({ error: 'term 与 meaning 必填' });
-    const doc = await Term.create({ term, meaning, cat, createdBy: req.user?._id });
+    const doc = await Term.create({ 
+      term, 
+      meaning, 
+      cat, 
+      icon: icon || '📚',
+      difficulty: difficulty || 'intermediate',
+      createdBy: req.user?._id 
+    });
     res.json(doc);
   } catch (e) {
     console.error('createTerm error', e);
@@ -38,12 +45,14 @@ exports.createTerm = async (req, res) => {
 exports.updateTerm = async (req, res) => {
   try {
     const { id } = req.params;
-    const { term, meaning, cat } = req.body || {};
+    const { term, meaning, cat, icon, difficulty } = req.body || {};
     const doc = await Term.findById(id);
     if (!doc) return res.status(404).json({ error: '术语不存在' });
     if (typeof term === 'string' && term.trim()) doc.term = term.trim();
     if (typeof meaning === 'string' && meaning.trim()) doc.meaning = meaning.trim();
     if (typeof cat === 'string') doc.cat = cat;
+    if (typeof icon === 'string') doc.icon = icon;
+    if (typeof difficulty === 'string') doc.difficulty = difficulty;
     await doc.save();
     res.json(doc);
   } catch (e) {
@@ -102,9 +111,19 @@ exports.getCase = async (req, res) => {
 
 exports.createCase = async (req, res) => {
   try {
-    const { title, domain, summary, content, tags = [] } = req.body || {};
+    const { title, domain, summary, content, tags = [], difficulty, estimatedTime, coverImage } = req.body || {};
     if (!title) return res.status(400).json({ error: '标题必填' });
-    const doc = await Case.create({ title, domain, summary, content, tags, createdBy: req.user._id });
+    const doc = await Case.create({ 
+      title, 
+      domain, 
+      summary, 
+      content, 
+      tags, 
+      difficulty: difficulty || 'intermediate',
+      estimatedTime: estimatedTime || '30分钟',
+      coverImage: coverImage || '📖',
+      createdBy: req.user._id 
+    });
     res.json(doc);
   } catch (e) {
     console.error('createCase error', e);
@@ -115,7 +134,7 @@ exports.createCase = async (req, res) => {
 exports.updateCase = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, domain, summary, content, tags } = req.body || {};
+    const { title, domain, summary, content, tags, difficulty, estimatedTime, coverImage } = req.body || {};
     const doc = await Case.findById(id);
     if (!doc) return res.status(404).json({ error: '案例不存在' });
     if (String(doc.createdBy) !== String(req.user._id) && req.user.role !== 'teacher') return res.status(403).json({ error: '无权操作' });
@@ -124,6 +143,9 @@ exports.updateCase = async (req, res) => {
     if (typeof summary === 'string') doc.summary = summary;
     if (typeof content === 'string') doc.content = content;
     if (Array.isArray(tags)) doc.tags = tags;
+    if (typeof difficulty === 'string') doc.difficulty = difficulty;
+    if (typeof estimatedTime === 'string') doc.estimatedTime = estimatedTime;
+    if (typeof coverImage === 'string') doc.coverImage = coverImage;
     await doc.save();
     res.json(doc);
   } catch (e) {

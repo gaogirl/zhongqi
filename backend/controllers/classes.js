@@ -237,25 +237,6 @@ exports.removeMember = async (req, res) => {
   }
 };
 
-exports.updateClass = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, subject, period } = req.body || {};
-    const cls = await Class.findById(id);
-    if (!cls) return res.status(404).json({ error: '班级不存在' });
-    if (String(cls.teacher) !== String(req.user._id)) return res.status(403).json({ error: '无权操作' });
-
-    if (typeof name === 'string' && name.trim()) cls.name = name.trim();
-    if (typeof subject === 'string') cls.subject = subject;
-    if (typeof period === 'string') cls.period = period;
-    await cls.save();
-    res.json({ success: true, class: cls });
-  } catch (e) {
-    console.error('updateClass error', e);
-    res.status(500).json({ error: '更新班级失败' });
-  }
-};
-
 exports.dashboard = async (req, res) => {
   try {
     const { id } = req.params; // classId

@@ -16,9 +16,8 @@ const ProtectedRoute = ({ allowedRoles }) => {
     }
 
     if (allowedRoles && !allowedRoles.includes(user?.role)) {
-        // 如果角色不匹配，可以重定向到未授权页面或首页
-        // 这里我们简单地重定向回他们能访问的仪表盘
-        const homePath = user.role === 'teacher' ? '/teacher/dashboard' : '/student/dashboard';
+        // 如果角色不匹配，重定向回他们能访问的首页
+        const homePath = user.role === 'teacher' ? '/teacher' : '/student';
         return <Navigate to={homePath} replace />;
     }
 
