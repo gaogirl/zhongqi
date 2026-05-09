@@ -3,6 +3,16 @@ const crypto = require('crypto');
 if (!global.crypto) {
   global.crypto = crypto;
 }
+// 为 MongoDB 驱动提供 getRandomValues 方法
+if (!global.crypto.getRandomValues) {
+  global.crypto.getRandomValues = (arr) => {
+    const bytes = crypto.randomBytes(arr.length);
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = bytes[i];
+    }
+    return arr;
+  };
+}
 
 const express = require('express');
 const mongoose = require('mongoose');
