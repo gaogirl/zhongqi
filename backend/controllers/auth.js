@@ -45,28 +45,33 @@ exports.register = async (req, res, next) => {
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  // 验证邮箱和密码
-  if (!email || !password) {
-    return res.status(400).json({ success: false, msg: '请输入邮箱和密码' });
+    // 验证邮箱和密码
+    if (!email || !password) {
+      return res.status(400).json({ success: false, msg: '请输入邮箱和密码' });
+    }
+
+    // 查找用户（包含密码字段）
+    const user = await User.findOne({ email }).select('+password');
+
+    if (!user) {
+      return res.status(401).json({ success: false, msg: '邮箱或密码错误' });
+    }
+
+    // 验证密码
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch) {
+      return res.status(401).json({ success: false, msg: '邮箱或密码错误' });
+    }
+
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ success: false, msg: '服务器错误: ' + err.message });
   }
-
-  // 查找用户（包含密码字段）
-  const user = await User.findOne({ email }).select('+password');
-
-  if (!user) {
-    return res.status(401).json({ success: false, msg: '邮箱或密码错误' });
-  }
-
-  // 验证密码
-  const isMatch = await user.matchPassword(password);
-
-  if (!isMatch) {
-    return res.status(401).json({ success: false, msg: '邮箱或密码错误' });
-  }
-
-  sendTokenResponse(user, 200, res);
 };
 
 // @desc    Get current logged in user
