@@ -36,7 +36,8 @@ export default function AIChat({ defaultModel = 'glm-4.5' }) {
 
     try {
       await chatRequest(newMessages, { model, stream: true }, (delta) => {
-        acc += delta;
+        const text = typeof delta === 'string' ? delta : (delta?.content || '');
+        acc += text;
         setMessages(prev => {
           const cloned = [...prev];
           // 找到最后一条 assistant 信息，并更新其 content

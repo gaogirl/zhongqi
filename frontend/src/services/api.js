@@ -37,12 +37,16 @@ api.interceptors.response.use(
     }
 
     const token = localStorage.getItem('token');
-    // 若是本地模式（local- 开头的 token），不要因 401 强制跳转
-    if (error.response?.status === 401 && !(token && token.startsWith('local-'))) {
-      // token过期或无效，清除本地存储并跳转到登录页
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    // 若是本地模式（local- 开头的 token），提示用户重新登录
+    if (error.response?.status === 401) {
+      if (token && token.startsWith('local-')) {
+        console.warn('当前使用本地认证模式，部分功能需要重新注册后使用');
+      } else {
+        // token过期或无效，清除本地存储并跳转到登录页
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/zhongqi/login';
+      }
     }
     return Promise.reject(error);
   }
