@@ -51,3 +51,339 @@ textarea { width:100%; min-height: 100px; }
 
 .note { font-size:12px; color:#868e96; }
 
+/* ========================================
+   教师端数据看板页面样式
+   ======================================== */
+
+.analytics-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+/* 头部 */
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1c7ed6 0%, #845ef7 100%);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  color: #fff;
+}
+
+.analytics-header .header-left h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.analytics-header .header-left p {
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.analytics-header .header-right {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.analytics-header .class-select {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.analytics-header .class-select option {
+  color: #333;
+  background: #fff;
+}
+
+.analytics-header .btn-primary {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #fff;
+  color: #1c7ed6;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.analytics-header .btn-primary:hover {
+  background: #f0f0f0;
+}
+
+/* 错误提示 */
+.analytics-error {
+  padding: 12px 20px;
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 10px;
+  color: #e53e3e;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* 加载状态 */
+.analytics-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f0f0f5;
+  border-top-color: #1c7ed6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.analytics-loading p {
+  margin-top: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* 空状态 */
+.analytics-empty, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.analytics-empty .empty-icon, .empty-state .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.analytics-empty p, .empty-state p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.analytics-empty span, .empty-state span {
+  font-size: 13px;
+  color: #999;
+}
+
+/* 核心指标卡片 */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 1000px) {
+  .metrics-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.metric-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card.highlight {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #fbbf24;
+}
+
+.metric-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.metric-info {
+  flex: 1;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 800;
+  color: #333;
+  line-height: 1.2;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* 详细数据区 */
+.analytics-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 800px) {
+  .analytics-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-panel {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.analytics-panel .panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #fafbfc;
+  border-bottom: 1px solid #f0f0f5;
+}
+
+.panel-icon {
+  font-size: 18px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+
+.analytics-panel .panel-body {
+  padding: 16px 20px;
+  min-height: 200px;
+}
+
+/* 常见错误列表 */
+.mistakes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mistake-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.mistake-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1c7ed6, #845ef7);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mistake-text {
+  font-size: 14px;
+  color: #333;
+}
+
+/* 提交列表 */
+.submissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.submission-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.submission-info {
+  flex: 1;
+}
+
+.submission-student {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.submission-time {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.score-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-badge.pending {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #fef3c7;
+  color: #d97706;
+}
+

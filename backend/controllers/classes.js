@@ -245,14 +245,63 @@ exports.dashboard = async (req, res) => {
     if (String(cls.teacher) !== String(req.user._id)) return res.status(403).json({ error: '无权访问' });
 
     const membersCount = (cls.members || []).length;
-    const assignmentsCount = await Assignment.countDocuments({ class: id });
-
+    
+    // 获取该班级的所有作业
+    const assignments = await Assignment.find({ class: id });
+    const assignmentsCount = assignments.length;
+    
+    // 获取所有作业的提交
+    const assignmentIds = assignments.map(a => a._id);
+    const submissions = await Submission.find({ assignment: { $in: assignmentIds } });
+    
+    // 计算完成率
+    const totalExpected = membersCount * assignmentsCount;
+    const totalSubmitted = submissions.length;
+    const completionRate = totalExpected > 0 ? totalSubmitted / totalExpected : 0;
+    
+    // 计算平均分（只计算已批改的）
+    const gradedSubmissions = submissions.filter(s => s.score !== null && s.score !== undefined);
+    const averageScore = gradedSubmissions.length > 0 
+      ? gradedSubmissions.reduce((sum, s) => sum + s.score, 0) / gradedSubmissions.length 
+      : 0;
+    
+    // 分析常见错误（从教师反馈中提取）
+    const mistakeKeywords = [];
+    gradedSubmissions.forEach(sub => {
+      if (sub.feedback) {
+        const feedback = sub.feedback.toLowerCase();
+        if (feedback.includes('语法') || feedback.includes('grammar')) mistakeKeywords.push('语法错误');
+        if (feedback.includes('用词') || feedback.includes('word')) mistakeKeywords.push('用词不当');
+        if (feedback.includes('时态') || feedback.includes('tense')) mistakeKeywords.push('时态错误');
+        if (feedback.includes('拼写') || feedback.includes('spelling')) mistakeKeywords.push('拼写错误');
+        if (feedback.includes('翻译') || feedback.includes('translation')) mistakeKeywords.push('翻译不准确');
+        if (feedback.includes('表达') || feedback.includes('expression')) mistakeKeywords.push('表达不地道');
+      }
+    });
+    
+    // 统计错误频率
+    const mistakeCount = {};
+    mistakeKeywords.forEach(m => {
+      mistakeCount[m] = (mistakeCount[m] || 0) + 1;
+    });
+    const commonMistakes = Object.entries(mistakeCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([mistake, count]) => `${mistake} (${count}次)`);
+    
+    // 获取最新提交
+    const recentSubmissions = submissions
+      .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
+      .slice(0, 10);
+    
     res.json({
       membersCount,
       assignmentsCount,
-      completionRate: 0,
-      averageScore: 0,
-      commonMistakes: [],
+      totalSubmissions: totalSubmitted,
+      completionRate,
+      averageScore: Math.round(averageScore * 10) / 10,
+      commonMistakes,
+      recentSubmissions
     });
   } catch (e) {
     console.error('dashboard error', e);

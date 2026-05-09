@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import classesAPI from '../../services/classes';
 import './Teacher.css';
 
@@ -36,50 +37,165 @@ export default function TeacherAnalytics() {
 
   useEffect(() => { fetchBoard(); /* eslint-disable-next-line */ }, [classId]);
 
+  // 获取分数颜色
+  const getScoreColor = (score) => {
+    if (score >= 90) return '#22c55e';
+    if (score >= 70) return '#3b82f6';
+    if (score >= 50) return '#f59e0b';
+    return '#ef4444';
+  };
+
+  // 格式化日期
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  };
+
   return (
-    <div className="page">
-      <div className="card">
-        <div className="card-head"><span>数据看板</span></div>
-        <div className="row" style={{ gap: 8, marginBottom: 12 }}>
-          <select value={classId} onChange={e=>setClassId(e.target.value)}>
+    <div className="analytics-page">
+      {/* 头部 */}
+      <div className="analytics-header">
+        <div className="header-left">
+          <h1>📊 数据看板</h1>
+          <p>实时追踪班级学习进度与作业完成情况</p>
+        </div>
+        <div className="header-right">
+          <select className="class-select" value={classId} onChange={e=>setClassId(e.target.value)}>
             {(classes || []).map(c => (
               <option key={c._id} value={c._id}>{c.name}</option>
             ))}
           </select>
-          <a className="btn" href={classId?`/teacher/classes/${classId}`:'#'} style={{ textDecoration:'none' }}>前往班级</a>
+          <Link className="btn-primary" to={classId?`/teacher/classes/${classId}`:'#'}>前往班级</Link>
         </div>
+      </div>
 
-        {err && <div className="note" style={{ color:'#e03131', marginBottom:8 }}>{err}</div>}
-        {loading ? <div>加载中…</div> : (
-          <div className="grid two">
-            <div className="card">
-              <div className="card-head"><span>核心指标</span></div>
-              {board ? (
-                <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12 }}>
-                  <div className="card"><div className="card-head"><span>成员数</span></div><div style={{ fontSize:28, fontWeight:800 }}>{board.membersCount}</div></div>
-                  <div className="card"><div className="card-head"><span>作业数</span></div><div style={{ fontSize:28, fontWeight:800 }}>{board.assignmentsCount}</div></div>
-                  <div className="card"><div className="card-head"><span>完成率</span></div><div style={{ fontSize:28, fontWeight:800 }}>{(board.completionRate*100).toFixed(0)}%</div></div>
-                  <div className="card"><div className="card-head"><span>平均分</span></div><div style={{ fontSize:28, fontWeight:800 }}>{board.averageScore}</div></div>
-                </div>
-              ) : (
-                <div>暂无数据</div>
-              )}
+      {err && <div className="analytics-error">{err}</div>}
+
+      {loading ? (
+        <div className="analytics-loading">
+          <div className="loading-spinner"></div>
+          <p>加载数据中...</p>
+        </div>
+      ) : board ? (
+        <>
+          {/* 核心指标卡片 */}
+          <div className="metrics-grid">
+            <div className="metric-card">
+              <div className="metric-icon" style={{ background: '#e0f2fe', color: '#0284c7' }}>👥</div>
+              <div className="metric-info">
+                <div className="metric-value">{board.membersCount}</div>
+                <div className="metric-label">班级成员</div>
+              </div>
             </div>
-
-            <div className="card">
-              <div className="card-head"><span>常见错误</span></div>
-              {board && (board.commonMistakes || []).length ? (
-                <ul style={{ margin:0, paddingLeft:16 }}>
-                  {board.commonMistakes.map((x,i)=>(<li key={i}>{x}</li>))}
-                </ul>
-              ) : (
-                <div>暂无</div>
-              )}
+            <div className="metric-card">
+              <div className="metric-icon" style={{ background: '#fef3c7', color: '#d97706' }}>📝</div>
+              <div className="metric-info">
+                <div className="metric-value">{board.assignmentsCount}</div>
+                <div className="metric-label">作业总数</div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-icon" style={{ background: '#d1fae5', color: '#059669' }}>✅</div>
+              <div className="metric-info">
+                <div className="metric-value">{board.totalSubmissions}</div>
+                <div className="metric-label">已提交</div>
+              </div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-icon" style={{ background: '#ede9fe', color: '#7c3aed' }}>📈</div>
+              <div className="metric-info">
+                <div className="metric-value">{(board.completionRate*100).toFixed(0)}%</div>
+                <div className="metric-label">完成率</div>
+              </div>
+            </div>
+            <div className="metric-card highlight">
+              <div className="metric-icon" style={{ background: '#fce7f3', color: '#db2777' }}>🏆</div>
+              <div className="metric-info">
+                <div className="metric-value" style={{ color: getScoreColor(board.averageScore) }}>
+                  {board.averageScore || '-'}
+                </div>
+                <div className="metric-label">平均分</div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+
+          {/* 详细数据区 */}
+          <div className="analytics-content">
+            {/* 左侧：常见错误 */}
+            <div className="analytics-panel">
+              <div className="panel-header">
+                <span className="panel-icon">⚠️</span>
+                <span className="panel-title">常见错误分析</span>
+              </div>
+              <div className="panel-body">
+                {board.commonMistakes && board.commonMistakes.length > 0 ? (
+                  <div className="mistakes-list">
+                    {board.commonMistakes.map((mistake, i) => (
+                      <div key={i} className="mistake-item">
+                        <span className="mistake-rank">{i + 1}</span>
+                        <span className="mistake-text">{mistake}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">📋</div>
+                    <p>暂无错误数据</p>
+                    <span>批改作业后，系统会自动分析常见错误</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 右侧：最近提交 */}
+            <div className="analytics-panel">
+              <div className="panel-header">
+                <span className="panel-icon">🕐</span>
+                <span className="panel-title">最近提交</span>
+              </div>
+              <div className="panel-body">
+                {board.recentSubmissions && board.recentSubmissions.length > 0 ? (
+                  <div className="submissions-list">
+                    {board.recentSubmissions.map((sub) => (
+                      <div key={sub._id} className="submission-item">
+                        <div className="submission-info">
+                          <div className="submission-student">{sub.student?.name || '学生'}</div>
+                          <div className="submission-time">{formatDate(sub.submittedAt)}</div>
+                        </div>
+                        <div className="submission-status">
+                          {sub.score !== null && sub.score !== undefined ? (
+                            <span className="score-badge" style={{ 
+                              background: getScoreColor(sub.score) + '20',
+                              color: getScoreColor(sub.score)
+                            }}>
+                              {sub.score}分
+                            </span>
+                          ) : (
+                            <span className="status-badge pending">待批改</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <div className="empty-icon">📭</div>
+                    <p>暂无提交记录</p>
+                    <span>学生提交作业后将显示在这里</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="analytics-empty">
+          <div className="empty-icon">📊</div>
+          <p>暂无数据</p>
+          <span>请先选择班级或创建班级</span>
+        </div>
+      )}
     </div>
   );
 }
-
