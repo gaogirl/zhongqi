@@ -1,12 +1,22 @@
 // AI 对话与翻译前端封装（使用后端代理，避免暴露密钥）
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
 
+// 获取认证 token
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+  }
+  return headers;
+}
+
 // 流式SSE处理
 async function streamSSE(url, data, onDelta) {
   try {
     const resp = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(data)
     });
 
@@ -59,15 +69,14 @@ export async function chatRequest(messages, { model = 'glm-4.5', stream = true, 
     try {
       const resp = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ messages, model, stream: false, temperature })
       });
       if (!resp.ok) throw new Error(await resp.text().catch(()=>'请求失败'));
       return resp.json(); // { content, raw }
     } catch (error) {
-      // 处理网络错误
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.error('网络错误：无法连接到AI服务。这可能是因为您正在GitHub Pages上访问应用，而后端服务器仅在本地运行。');
+        console.error('网络错误：无法连接到AI服务。');
       }
       throw error;
     }
@@ -82,15 +91,14 @@ export async function translateRequest(text, { sourceLanguage = 'auto', targetLa
     try {
       const resp = await fetch(`${API_BASE}/translate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ text, sourceLanguage, targetLanguage, model, stream: false })
       });
       if (!resp.ok) throw new Error(await resp.text().catch(()=>'请求失败'));
       return resp.json(); // { translation, raw }
     } catch (error) {
-      // 处理网络错误
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.error('网络错误：无法连接到翻译服务。这可能是因为您正在GitHub Pages上访问应用，而后端服务器仅在本地运行。');
+        console.error('网络错误：无法连接到翻译服务。');
       }
       throw error;
     }
@@ -98,6 +106,3 @@ export async function translateRequest(text, { sourceLanguage = 'auto', targetLa
 }
 
 export { API_BASE };
-
-
-

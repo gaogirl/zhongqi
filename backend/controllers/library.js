@@ -89,7 +89,7 @@ exports.listCases = async (req, res) => {
     const total = await Case.countDocuments(q);
     const list = await Case.find(q).sort({ createdAt: -1 }).skip((p - 1) * ps).limit(ps).lean();
     // 只返回部分字段用于卡片列表
-    const data = list.map(c => ({ _id: c._id, title: c.title, domain: c.domain, summary: c.summary, tags: c.tags, createdAt: c.createdAt }));
+    const data = list.map(c => ({ _id: c._id, title: c.title, domain: c.domain, summary: c.summary, tags: c.tags, difficulty: c.difficulty, estimatedTime: c.estimatedTime, coverImage: c.coverImage, gradient: c.gradient, createdAt: c.createdAt }));
     res.json({ total, page: p, pageSize: ps, list: data });
   } catch (e) {
     console.error('listCases error', e);

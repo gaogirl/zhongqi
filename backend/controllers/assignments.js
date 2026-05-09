@@ -99,6 +99,23 @@ exports.listForStudent = async (req, res) => {
       const s = subMap.get(String(a._id));
       let status = 'pending';
       if (s) status = s.status || 'submitted';
+      // 教师可以看到完整数据，学生只看基本信息
+      if (req.user.role === 'teacher') {
+        return {
+          _id: a._id,
+          title: a.title,
+          type: a.type,
+          dueAt: a.dueAt,
+          createdAt: a.createdAt,
+          questions: a.questions || [],
+          retryLimit: a.retryLimit,
+          allowViewRef: a.allowViewRef,
+          termIds: a.termIds || [],
+          caseIds: a.caseIds || [],
+          status,
+          myScore: s?.totalScore ?? null,
+        };
+      }
       return {
         _id: a._id,
         title: a.title,

@@ -6,6 +6,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { protect, authorize } = require('../../middleware/auth');
 const mongoose = require('mongoose');
 
 const Term = require('../../models/Term');
@@ -385,7 +386,7 @@ const sampleCases = [
   },
 ];
 
-router.post('/init-sample-data', async (req, res) => {
+router.post('/init-sample-data', protect, authorize('teacher'), async (req, res) => {
   try {
     // 清空现有数据
     await Term.deleteMany({});

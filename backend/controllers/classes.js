@@ -1,5 +1,6 @@
 const Class = require('../models/Class');
 const Assignment = require('../models/Assignment');
+const Submission = require('../models/Submission');
 const mongoose = require('mongoose');
 
 function genInviteCode(len = 6) {
@@ -250,32 +251,38 @@ exports.dashboard = async (req, res) => {
     const assignments = await Assignment.find({ class: id });
     const assignmentsCount = assignments.length;
     
-    // 获取所有作业的提交
+    // 获取所有作业的提交（含学生信息）
     const assignmentIds = assignments.map(a => a._id);
-    const submissions = await Submission.find({ assignment: { $in: assignmentIds } });
+    const submissions = await Submission.find({ assignment: { $in: assignmentIds } })
+      .populate('student', 'name email')
+      .sort({ createdAt: -1 });
     
     // 计算完成率
     const totalExpected = membersCount * assignmentsCount;
     const totalSubmitted = submissions.length;
     const completionRate = totalExpected > 0 ? totalSubmitted / totalExpected : 0;
     
-    // 计算平均分（只计算已批改的）
-    const gradedSubmissions = submissions.filter(s => s.score !== null && s.score !== undefined);
+    // 计算平均分（使用 totalScore）
+    const gradedSubmissions = submissions.filter(s => s.totalScore !== null && s.totalScore !== undefined);
     const averageScore = gradedSubmissions.length > 0 
-      ? gradedSubmissions.reduce((sum, s) => sum + s.score, 0) / gradedSubmissions.length 
+      ? gradedSubmissions.reduce((sum, s) => sum + s.totalScore, 0) / gradedSubmissions.length 
       : 0;
     
-    // 分析常见错误（从教师反馈中提取）
+    // 分析常见错误（从答案反馈中提取）
     const mistakeKeywords = [];
-    gradedSubmissions.forEach(sub => {
-      if (sub.feedback) {
-        const feedback = sub.feedback.toLowerCase();
-        if (feedback.includes('语法') || feedback.includes('grammar')) mistakeKeywords.push('语法错误');
-        if (feedback.includes('用词') || feedback.includes('word')) mistakeKeywords.push('用词不当');
-        if (feedback.includes('时态') || feedback.includes('tense')) mistakeKeywords.push('时态错误');
-        if (feedback.includes('拼写') || feedback.includes('spelling')) mistakeKeywords.push('拼写错误');
-        if (feedback.includes('翻译') || feedback.includes('translation')) mistakeKeywords.push('翻译不准确');
-        if (feedback.includes('表达') || feedback.includes('expression')) mistakeKeywords.push('表达不地道');
+    submissions.forEach(sub => {
+      if (sub.answers && Array.isArray(sub.answers)) {
+        sub.answers.forEach(ans => {
+          if (ans.feedback) {
+            const feedback = ans.feedback.toLowerCase();
+            if (feedback.includes('语法') || feedback.includes('grammar')) mistakeKeywords.push('语法错误');
+            if (feedback.includes('用词') || feedback.includes('word')) mistakeKeywords.push('用词不当');
+            if (feedback.includes('时态') || feedback.includes('tense')) mistakeKeywords.push('时态错误');
+            if (feedback.includes('拼写') || feedback.includes('spelling')) mistakeKeywords.push('拼写错误');
+            if (feedback.includes('翻译') || feedback.includes('translation')) mistakeKeywords.push('翻译不准确');
+            if (feedback.includes('表达') || feedback.includes('expression')) mistakeKeywords.push('表达不地道');
+          }
+        });
       }
     });
     
@@ -289,10 +296,15 @@ exports.dashboard = async (req, res) => {
       .slice(0, 5)
       .map(([mistake, count]) => `${mistake} (${count}次)`);
     
-    // 获取最新提交
-    const recentSubmissions = submissions
-      .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt))
-      .slice(0, 10);
+    // 获取最新提交（已按 createdAt 降序排列）
+    const recentSubmissions = submissions.slice(0, 10).map(s => ({
+      _id: s._id,
+      student: s.student ? { _id: s.student._id, name: s.student.name, email: s.student.email } : null,
+      totalScore: s.totalScore,
+      status: s.status,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt
+    }));
     
     res.json({
       membersCount,

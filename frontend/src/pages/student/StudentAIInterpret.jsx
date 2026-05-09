@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { API_BASE } from '../../services/ai';
+import { translateRequest } from '../../services/ai';
 import evalAPI from '../../services/eval';
 import './Student.css';
 
@@ -61,17 +61,8 @@ export default function StudentAIInterpret() {
     try {
       // 并行执行：AI翻译 + 评分
       const [transRes, evalRes] = await Promise.all([
-        // AI翻译
-        fetch(`${API_BASE}/translate`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            text: sourceText, 
-            targetLang, 
-            stream: false, 
-            model 
-          })
-        }).then(r => r.json()),
+        // AI翻译（使用封装好的 translateRequest，自动带 token）
+        translateRequest(sourceText, { targetLanguage: targetLang, model, stream: false }),
         // 评分评估
         evalAPI.evaluateTranslation({
           direction,
