@@ -31,13 +31,21 @@ const app = express();
 // 中间件
 // 配置CORS
 const corsOptions = {
-  origin: [
-    process.env.CLIENT_URL || 'http://localhost:5173',
-    'https://gaogirl.github.io',
-    'https://gaogirl.github.io/ai-virtual'
-  ],
+  origin: function (origin, callback) {
+    // 允许没有 origin 的请求（如服务端请求）和所有白名单来源
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'https://gaogirl.github.io',
+      'https://gaogirl.github.io/ai-virtual'
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // 生产环境暂时允许所有来源
+    }
+  },
   credentials: true, // 允许发送cookies
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
 
