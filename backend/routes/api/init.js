@@ -12,6 +12,50 @@ const mongoose = require('mongoose');
 const Term = require('../../models/Term');
 const Case = require('../../models/Case');
 const Question = require('../../models/Question');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+// 创建管理员账号（首次部署时使用）
+// POST /api/init-admin
+// Body: { name, email, password, adminKey: 'INIT_ADMIN_2024' }
+router.post('/init-admin', async (req, res) => {
+  try {
+    const { name, email, password, adminKey } = req.body;
+    
+    // 简单的安全密钥验证（防止任意创建管理员）
+    if (adminKey !== 'INIT_ADMIN_2024') {
+      return res.status(403).json({ error: '管理员创建密钥错误' });
+    }
+    
+    // 检查邮箱是否已存在
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: '该邮箱已被注册' });
+    }
+    
+    // 创建管理员账号
+    const admin = await User.create({
+      name: name || '管理员',
+      email,
+      password, // 会在 User model 的 pre save hook 中自动加密
+      role: 'admin'
+    });
+    
+    res.json({
+      success: true,
+      message: '管理员账号创建成功',
+      admin: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: admin.role
+      }
+    });
+  } catch (error) {
+    console.error('创建管理员失败:', error);
+    res.status(500).json({ error: '创建管理员失败: ' + error.message });
+  }
+});
 
 // 生成渐变色彩
 const gradients = [
@@ -656,7 +700,7 @@ const sampleQuestions = [
   }
 ];
 
-router.post('/init-sample-data', protect, authorize('teacher'), async (req, res) => {
+router.post('/init-sample-data', protect, authorize('teacher', 'admin'), async (req, res) => {
   try {
     // 清空现有数据
     await Term.deleteMany({});

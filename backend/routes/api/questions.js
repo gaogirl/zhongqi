@@ -12,10 +12,10 @@ router.post('/check', protect, questionsController.checkAnswers);
 router.get('/', protect, questionsController.list);
 
 // Teacher routes
-router.post('/', protect, authorize('teacher'), questionsController.create);
-router.patch('/:id', protect, authorize('teacher'), questionsController.update);
-router.delete('/:id', protect, authorize('teacher'), questionsController.remove);
-router.post('/import', protect, authorize('teacher'), upload.single('file'), questionsController.importExcel);
-router.get('/template', protect, authorize('teacher'), questionsController.downloadTemplate);
+router.post('/', protect, authorize('teacher', 'admin'), questionsController.create);
+router.patch('/:id', protect, authorize('teacher', 'admin'), questionsController.update);
+router.delete('/:id', protect, authorize('teacher', 'admin'), questionsController.remove);
+router.post('/import', protect, authorize('teacher', 'admin'), upload.single('file'), questionsController.importExcel);
+router.get('/template', protect, authorize('teacher', 'admin'), questionsController.downloadTemplate);
 
 module.exports = router;

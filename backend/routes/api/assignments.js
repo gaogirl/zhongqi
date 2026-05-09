@@ -4,11 +4,11 @@ const { protect, authorize } = require('../../middleware/auth');
 const assignments = require('../../controllers/assignments');
 
 // 教师：布置作业
-router.post('/', protect, authorize('teacher'), assignments.create);
+router.post('/', protect, authorize('teacher', 'admin'), assignments.create);
 // 教师：更新作业
-router.patch('/:id', protect, authorize('teacher'), assignments.update);
+router.patch('/:id', protect, authorize('teacher', 'admin'), assignments.update);
 // 教师：删除作业
-router.delete('/:id', protect, authorize('teacher'), assignments.remove);
+router.delete('/:id', protect, authorize('teacher', 'admin'), assignments.remove);
 
 // 班级作业列表（学生/教师都可，接口内部校验是否班级成员）
 router.get('/class/:classId', protect, assignments.listForStudent);
@@ -20,7 +20,7 @@ router.get('/:id', protect, assignments.detail);
 router.post('/:id/submit', protect, authorize('student'), assignments.submit);
 
 // 教师查看提交列表
-router.get('/:id/submissions', protect, authorize('teacher'), assignments.submissionsOf);
+router.get('/:id/submissions', protect, authorize('teacher', 'admin'), assignments.submissionsOf);
 
 module.exports = router;
 
