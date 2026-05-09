@@ -32,7 +32,7 @@ import './App.css';
 
 function App() {
   return (
-    <Router>
+    <Router basename="/zhongqi">
       <div className="App">
         <Routes>
           {/* 公共路由 */}
