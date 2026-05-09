@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import StudentTerms from './pages/student/StudentTerms';
 import StudentCases from './pages/student/StudentCases';
 import StudentCaseDetail from './pages/student/StudentCaseDetail';
+import StudentLibrary from './pages/student/StudentLibrary';
 import TeacherTerms from './pages/teacher/TeacherTerms';
 import TeacherCases from './pages/teacher/TeacherCases';
 import TeacherLayout from './pages/teacher/TeacherLayout';
@@ -48,6 +49,7 @@ function App() {
               <Route index element={<StudentHome />} />
               <Route path="ai" element={<StudentAIChat />} />
               <Route path="ai-interp" element={<StudentAIInterpret />} />
+              <Route path="library" element={<StudentLibrary />} />
               <Route path="terms" element={<StudentTerms />} />
               <Route path="cases" element={<StudentCases />} />
               <Route path="cases/:id" element={<StudentCaseDetail />} />
